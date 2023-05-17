@@ -1,0 +1,10 @@
+pandas
+numpy 
+cython
+argparse
+pysam
+joblib
+tqdm
+lmfit
+sklearn
+pytest
