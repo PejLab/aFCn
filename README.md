@@ -21,8 +21,8 @@ Let's revisit the model by defining variables:
 then it follows that
 
 $$
-\log(Y) = \alpha + 
-    \log\left(e^{x_1^{T}\beta} + e^{x_2^{T}\beta}\right) + 
+\log(Y) = 
+    \log\left(e^{\alpha + x_1^{T}\beta} + e^{\alpha + x_2^{T}\beta}\right) + 
     \epsilon
 $$ 
 
