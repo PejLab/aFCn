@@ -133,8 +133,91 @@ class Test_predict(TestCase):
 
 
 class TestPredict(TestCase):
-    def test_data_type_checks(self):
-        pass
+    rng = np.random.default_rng()
+    h1 = rng.choice([0,1], size=100, replace=True)
+    h2 = rng.choice([0,1], size=100, replace=True)
+
+    alpha = rng.normal()
+    beta = rng.normal(size=100)
+
+    def test_biallelic_data_check(self):
+        """Test whether biallelic data check is called returned values.
+
+        Unit tests for is_biallelic func more rigorously checks the
+        function.  Here, we are just checking that some method is called 
+        """
+        tmp = self.h1.copy()
+        tmp[24] = 4
+        with self.assertRaises(ValueError):
+            model.predict(self.h1, tmp, self.alpha, self.beta)
+
+        with self.assertRaises(ValueError):
+            model.predict(tmp, self.h2, self.alpha, self.beta)
+
+
+    def test_beta_check(self):
+        with self.assertRaises(ValueError):
+            model.predict(self.h1, 
+                          self.h2, 
+                          self.alpha, 
+                          np.hstack([self.beta, self.beta]))
+
+        with self.assertRaises(ValueError):
+            model.predict(self.h1, 
+                          self.h2, 
+                          self.alpha, 
+                          self.beta[:-2])
+
+        with self.assertRaises(ValueError):
+            tmp = self.beta.copy()
+            tmp[2] = "the"
+            model.predict(self.h1, 
+                          self.h2, 
+                          self.alpha, 
+                          tmp)
+
+        with self.assertRaises(AttributeError):
+            model.predict(self.h1, 
+                          self.h2, 
+                          self.alpha, 
+                          self.beta.tolist())
+
+        with self.assertRaises(AttributeError):
+            model.predict(self.h1, 
+                          self.h2, 
+                          self.alpha, 
+                          1.3)
+
+
+    def test_alpha_check(self):
+        with self.assertRaises(ValueError):
+            model.predict(self.h1,
+                          self.h2,
+                          np.array([self.alpha]),
+                          self.beta)
+            
+        with self.assertRaises(ValueError):
+            model.predict(self.h1,
+                          self.h2,
+                          "cat",
+                          self.beta)
+
+        with self.assertRaises(ValueError):
+            model.predict(self.h1,
+                          self.h2,
+                          [self.alpha],
+                          self.beta)
+
+
+    def test_prediction_vals(self):
+        """Test whether the outputs of model._predict are returned."""
+        alpha = 1.5
+        self.assertAlmostEqual(np.exp2(alpha)*(np.exp2(3) + np.exp2(2)),
+                               model.predict(np.array([1,1]), 
+                                             np.array([0,1]),
+                                             alpha,
+                                             np.array([1,2]))
+                               )
 
 
 class TestSimulate(TestCase):
