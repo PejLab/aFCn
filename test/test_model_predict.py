@@ -15,7 +15,7 @@ class Test_predict(TestCase):
         h2 = np.array([1, 0, 1])
         beta = np.array([1, 3, 0.5])
         alpha = 0
-        y_true = np.exp(3.5) + np.exp(1.5)
+        y_true = np.exp2(3.5) + np.exp2(1.5)
 
         self.assertAlmostEqual(y_true,
                                model._predict(h1, h2, alpha, beta))
@@ -46,9 +46,9 @@ class Test_predict(TestCase):
         beta = np.array([3])
         alpha = 0
 
-        y_true = np.array([1 + np.exp(3),
-                           np.exp(3) + 1,
-                           2*np.exp(3)])
+        y_true = np.array([1 + np.exp2(3),
+                           np.exp2(3) + 1,
+                           2*np.exp2(3)])
 
         y_predict = model._predict(h1,h2,alpha,beta)
 
@@ -81,14 +81,14 @@ class Test_predict(TestCase):
                                )
         
         # y = (e^(1 + 0 * 1) + e^(1 + 0 * 1)) = 2e
-        self.assertAlmostEqual(2 * np.exp(1),
+        self.assertAlmostEqual(2 * np.exp2(1),
                                model._predict(0, 0,
                                               1,
                                               1)
                                )
 
         # y = (e^(0 + 1 * 2) + e^(0 + 0 * 2)) = e^2 + 1
-        self.assertAlmostEqual(np.exp(2) + 1,
+        self.assertAlmostEqual(np.exp2(2) + 1,
                                model._predict(1, 0,
                                               0,
                                               2)
@@ -96,7 +96,7 @@ class Test_predict(TestCase):
 
         # y = e^(0 + dot([1,1],[1,2])) + e^(0 + dot([1,0][1,2])
         # = e^3 + e^1
-        self.assertAlmostEqual(np.exp(3) + np.exp(1),
+        self.assertAlmostEqual(np.exp2(3) + np.exp2(1),
                                model._predict(np.array([1,1]), 
                                               np.array([1,0]),
                                               0,
@@ -106,7 +106,7 @@ class Test_predict(TestCase):
 
         # y = e^(0 + dot([1,1],[1,2])) + e^(0 + dot([0,1][1,2])
         # = e^3 + e^2
-        self.assertAlmostEqual(np.exp(3) + np.exp(2),
+        self.assertAlmostEqual(np.exp2(3) + np.exp2(2),
                                model._predict(np.array([1,1]), 
                                               np.array([0,1]),
                                               0,
@@ -123,7 +123,7 @@ class Test_predict(TestCase):
         # haplotype consists of 100 variants, on haplotype
         # is only ref, the other only alt
 
-        self.assertAlmostEqual(np.exp(100) + 1,
+        self.assertAlmostEqual(np.exp2(100) + 1,
                                model._predict(np.zeros(100), 
                                               np.ones(100),
                                               0,

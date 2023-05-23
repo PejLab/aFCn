@@ -25,8 +25,8 @@ def _predict(hap_one, hap_two, alpha, beta):
     Args:
         see predict
     """
-    return (np.exp(alpha + np.dot(hap_one, beta)) + 
-            np.exp(alpha + np.dot(hap_two, beta)))
+    return (np.exp2(alpha + np.dot(hap_one, beta)) + 
+            np.exp2(alpha + np.dot(hap_two, beta)))
 
 
 def predict(hap_one, hap_two, alpha, beta):
