@@ -1,5 +1,5 @@
 # aFC-n
-aFC-n calculates the effect size of conditionally independent eQTLs in allelic fold change (aFC), and predicts genetically driven gene expressionan and allelic imbalance using conditional eQTL data. This script calculates aFCs using least squares optimization (levenberg-marquardt) for a set of eqtls given a set of gene expressions and phased vcf file. 
+aFC-n calculates the effect size of conditionally independent eQTLs in allelic fold change (aFC), which could be used to predict genetically driven gene expressionan and allelic imbalance using conditional eQTL data. This script calculates aFCs using least squares optimization (levenberg-marquardt) for a set of eqtls given a set of gene expressions and phased vcf file. 
 
 
 
