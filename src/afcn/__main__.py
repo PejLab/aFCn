@@ -3,89 +3,186 @@
 By: Genomic Data Modeling Laboratory
 """
 
-
-_fit_descpt="""Fit log fold changes from phased genotypes and expression data.
-
-Output File Specification:
-    * tab delimited BED file as defined in
-
-        https://github.com/samtools/hts-specs/
-
-        repository at commit 9ddbc52
-    * Contains header
-    * Data contains 4 BED fields, and custom fields.  The genomic position is
-        that of variant:
-
-        #chrom  start   end variant_id  gene_id ln_afc  ci_low  ci_hi   pval
-"""
-
 import sys
 import argparse
 
-# from . import model
 
+parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter)
 
-parser = argparse.ArgumentParser()
+parser.add_argument("--version",
+                    dest="version",
+                    action="store_true")
+
 subparsers = parser.add_subparsers(title = "subcommands",
                                    dest = "subparser_name",
                                    help = "Select the task for afcn to complete.")
 
-# fit subcommand options
-# required inputs
 
-fit_parser = subparsers.add_parser("fit",
-                                   help=_fit_descpt)
+# ================================================================
 
-fit_parser.add_argument("--vcf", 
-                        type=str,
-                        required=True, 
-                        help="Genotype VCF file name")
+# fit subcommand
 
-fit_parser.add_argument("--expr", 
-                        type=str,
-                        required=True, 
-                        help="BED file containing 4 BED fields and "
-                            "gene expression per sample.")
+# fit_parser = subparsers.add_parser(
+#         "fit",
+#         help="Fit gene expression effect sizes from phased genotypes.",
+#         formatter_class=argparse.RawDescriptionHelpFormatter,
+#         description="Fit model parameters and write to file in direcotry.",
+#         epilog = """OUTPUT FILE SPECIFICATION
+# """)
+# 
+# fit_parser.add_argument("--vcf", 
+#                         type=str,
+#                         required=True, 
+#                         help="Genotype VCF file name")
+# 
+# fit_parser.add_argument("--expr", 
+#                         type=str,
+#                         required=True, 
+#                         help="BED file containing 4 BED fields and "
+#                             "gene expression per sample.")
+# 
+# 
+# # optional inputs
+# 
+# fit_parser.add_argument("--eqtl", 
+#                         type=str,
+#                         default=None,
+#                         help=("Name of file that contains eQTLs for which log "
+#                               "allelic fold change values are inferred from "
+#                               "data. The first and second columns must be "
+#                               "#gene_id and variant_id, "
+#                               "respectively (default None)"))
+# 
+# 
+# # TODO write specification of covariate file
+# 
+# fit_parser.add_argument("--covariates",
+#                         type=str,
+#                         required=False,
+#                         help=("File containing covariate data."))
+# 
+# fit_parser.add_argument("output_dir",
+#                         type=str,
+#                         nargs="?",
+#                         default="afcs.bed", 
+#                         help="Output file name")
+# 
+
+# ================================================================
+
+# prediction subcommand
+
+predict_parser = subparsers.add_parser(
+        "predict",
+        help="Predict gene expression from phased genotype data.",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        description="""
+Given an individual's cis-regulatory variant genotype
+and log2 fold change effect sizes predict gene expression 
+under the model by Mohammadi et al. Genome Research 2017.""",
+        epilog = """
+SPECIFICATION PARAMETER FILE INPUT
+
+BED 4 file with meta data and header as follows:
+
+* line [0, n): meta data prepended with ##
+* line n: header prepended with #
+* line [n+1, n+1+N_eqtls): records
+
+Contents:
+
+## meta data
+    - ##afcn_version = (version str)
+    - ##vcf_file = (str)
+    - ##expression_file = (str)
+    - ##eqtl_file = (str)
+    - etc.
+* BED fields labeled: 
+    - #chrom, 
+    - start: (int) minimum(variant position, gene position)
+    - end: (int) maximum(variant position, gene position)
+    - qtl_id: (string) gene_id/variant_id
+* custom fields:
+    - gene_start: (integer) transcription start site of gene
+    - gene_end: (integer) end of gene
+    - gene_id: (string) Ensembl gene id
+    - variant_pos: (integer) variant genomic coordinates from VCF
+    - variant_id: (string)
+    - ref: (char) reference allele
+    - alt: (char) alternative allele
+    - log2_afc: (float) estimated model parameter
+    - remaining columns are statistics relevant to
+        parameter inference
 
 
-# optional inputs
+OUTPUT FILES
 
-fit_parser.add_argument("--eqtl", 
-                        type=str,
-                        default=None,
-                        help=("Name of file that contains eQTLs for which log "
-                              "allelic fold change values are inferred from "
-                              "data. The first and second columns must be "
-                              "#gene_id and variant_id, "
-                              "respectively (default None)"))
+* <output_dir>/predictions.bed
+* <output_dir>/predictions.log
 
 
-# TODO write specification of covariate file
+SPECIFICATION predictions.bed
 
-fit_parser.add_argument("--covariates",
-                        type=str,
-                        required=False,
-                        help=("File containing covariate data."))
+BED 4 file with meta data and header as follows:
 
-fit_parser.add_argument("output_file",
-                        type=str,
-                        nargs="?",
-                        default="afcs.bed", 
-                        help="Output file name")
+* line [0, n): meta data prepended with ##
+* line n: header prepended with #
+* line [n+1, n+1+N_samples): records
 
-# predict subcommand options
+Contents:
 
-predict_parser = subparsers.add_parser("predict",
-                                       help="test")
+* meta data
+    - ##afcn_version=(version str)
+    - ##vcf_file=(str)
+    - ##parameter_file=(str)
+* BED fields labeled: 
+    - #chrm, start, end, gene_id
+* custom fields:
+    - predicted_expr: (float) predicted gene expression
+""")
 
+predict_parser.add_argument(
+        "--vcf",
+        required=True,
+        help="""VCF file version 4.4 as defined in the samtools 
+        documentation.""")
+predict_parser.add_argument(
+        "--params",
+       required=True,
+       help="""Tab delimited text file providing
+       log2 aFC point estimates per (gene, variant)
+       pair.  See below for more details.
+       """)
+predict_parser.add_argument(
+        "output_dir",
+        type=str,
+        help="Directory to write results")
 
-# twas subcommand options
-twas_parser = subparsers.add_parser("twas",
-                                    help="test")
+# ================================================================
 
+# twas subcommand
+
+# twas_parser = subparsers.add_parser(
+#         "twas",
+#         help="""Perform transcriptome wide association study
+#         from gene expression predictions.""",
+#         formatter_class=argparse.RawDescriptionHelpFormatter,
+#         description="""
+# Given a set of gene expression predictions per individual, perform 
+# association tests between the predicted expression and a observed
+# phenotype.
+# """,
+#         epilog = """
+# OUTPUT FILE SPECIFICATION
+# """)
 
 
 args = parser.parse_args(sys.argv[1:])
+
+
+if args.version:
+    import afcn
+    print(f"afcn {afcn.__version__}")
 
 if args.subparser_name == "fit":
     from . import _fit
@@ -96,7 +193,7 @@ if args.subparser_name == "fit":
 if args.subparser_name == "predict":
     from . import _predict
 
-    _predict.run()
+    _predict.run(args.vcf, args.params, args.output_dir)
 
 
 if args.subparser_name == "twas":
