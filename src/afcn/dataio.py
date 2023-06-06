@@ -87,9 +87,13 @@ class ParseParamBedABC:
         try:
             par_line = par_line.removeprefix(self._header_prefix)
         except UnboundLocalError as err:
-            err.add_note(("\nMost likely reason for failure is that "
-                          f"file {self.name} is empty."))
-            raise 
+            # the add_note method is available on Python 3.11 +
+            #err.add_note(("\nMost likely reason for failure is that "
+            #              f"file {self.name} is empty."))
+            err.args = (err.args[0] + 
+                        f"\nMost likely reason for failure is "
+                        "that file {self.name} is empty.",)
+            raise UnboundLocalError(err) from None
 
         if not par_line.startswith(self._req_header_fields[0]):
             raise ValueError("Header must be present")
