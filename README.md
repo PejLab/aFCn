@@ -24,14 +24,16 @@ from either the command line or within a Python script.
 
 ## Installation
 
-The package can be installed directly from the GitHub repo using `pip`
+🚧
+
+<!-- The package can be installed directly from the GitHub repo using `pip`
 
 ```
 python -m pip install git+https://github.com/PejLab/aFCn.git
 ```
 
 or cloned and installed from local source code using pip.
-
+-->
 
 ## Examples
 
