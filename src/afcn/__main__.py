@@ -138,7 +138,7 @@ Contents:
 * BED fields labeled: 
     - #chrm, start, end, gene_id
 * custom fields:
-    - predicted_expr: (float) predicted gene expression
+    - sample_id: (float) predicted gene expression per sample
 """)
 
 predict_parser.add_argument(

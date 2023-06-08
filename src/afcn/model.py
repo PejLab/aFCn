@@ -46,9 +46,9 @@ def predict(hap_one, hap_two, alpha, beta):
             should always be a 1-d array
 
     Returns:
-        either:
-            ((N samples,) ndarray) with > 1 sample and arbirary number
-                of variants
+        (float) or 
+        ((N samples,) ndarray) with > 1 sample and arbirary number
+            of variants
     """
     if (not utils.is_biallelic(hap_one) or
         not utils.is_biallelic(hap_two)):
