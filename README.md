@@ -1,3 +1,5 @@
+![unit-tests](https://github.com/PejLab/aFCn/actions/workflows/unit-tests.yml/badge.svg?branch=new_interface)
+
 # 🚧 Under Construction 🚧
 
 # Inferring allele Fold Change (aFC) from phased data

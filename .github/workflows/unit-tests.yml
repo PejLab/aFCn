@@ -1,0 +1,31 @@
+# Much of this workflow was taken from GitHub starter workflows
+# https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
+#
+# By GDML
+# 2023-06-08
+#
+name: unit-tests
+run-name: Test run by ${{ github.actor }}
+on: 
+  push:
+    branches:
+      - new_interface
+  pull_request:
+    branches:
+      - new_interface
+
+jobs:
+  run-unit-tests:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python_version: ["3.7", "3.8", "3.9", "3.10"]
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Pythohn ${{ matrix.python_version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python_version }}
+      - name: Run unit-tests with unittest module
+        run: |
+          python -m unittest
