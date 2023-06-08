@@ -22,16 +22,14 @@ jobs:
         python_version: ["3.7", "3.8", "3.9", "3.10"]
     steps:
       - uses: actions/checkout@v3
-      - name: Set up Pythohn ${{ matrix.python_version }}
+      - name: Set up Python ${{ matrix.python_version }}
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python_version }}
       - name: Install packages
         run: |
-          echo "$HOME"
-          pwd
           python -m pip install --upgrade pip
-          python -m pip install .
+          python -m pip install --editable .
       - name: Run unit-tests with unittest module
         run: |
           python -m unittest
