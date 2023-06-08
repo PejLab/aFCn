@@ -26,8 +26,12 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python_version }}
+      - name: Install packages
+        run: |
+          echo "$HOME"
+          pwd
+          python -m pip install --upgrade pip
+          python -m pip install .
       - name: Run unit-tests with unittest module
         run: |
-          pwd
-          ls
-          #          python -m unittest
+          python -m unittest
