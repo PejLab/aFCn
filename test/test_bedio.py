@@ -6,7 +6,7 @@ import io
 import gzip
 import unittest
 
-from afcn import dataio
+from afcn import bedio
 
 TEST_DIR = os.path.join(os.path.dirname(__file__),
                         "tmp_test_data")
@@ -42,7 +42,7 @@ SIM_DATA = [
 
 
 # Use for in memory test of abstract base clase
-class MockParser(io.BytesIO, dataio.ParseParamBedABC):
+class MockParser(io.BytesIO, bedio.ParseParamBedABC):
     def __init__(self, filename, data_string):
 
         self.name = filename
@@ -50,7 +50,7 @@ class MockParser(io.BytesIO, dataio.ParseParamBedABC):
         io.BytesIO.__init__(self, data_string.encode(encoding="utf-8"))
 
         try:
-            dataio.ParseParamBedABC.__init__(self)
+            bedio.ParseParamBedABC.__init__(self)
         except:
             if not self.closed:
                 self.close()
@@ -142,7 +142,7 @@ def setUpModule():
     FILE_IO_DATA = []
 
     # These data are in memory and make use of the MockParser
-    # for testing the dataio.ParseParamBedABC
+    # for testing the bedio.ParseParamBedABC
 
     global INVALID_HEADER
     INVALID_HEADER = []
@@ -196,33 +196,33 @@ def tearDownModule():
         shutil.rmtree(TEST_DIR)
 
 
-class Testread_bed(unittest.TestCase):
+class Testopen_param(unittest.TestCase):
 
     def test_correct_inputs(self):
 
         for ds in FILE_IO_DATA:
 
             if ds.filename.endswith(".bed.gz"):
-                io_class_ = dataio.ParseParamGzipBed
+                io_class_ = bedio.ParseParamGzipBed
             elif ds.filename.endswith(".bed"):
-                io_class_ = dataio.ParseParamBed
+                io_class_ = bedio.ParseParamBed
 
 
-            with dataio.read_bed(ds.filename) as tmp:
+            with bedio.open_param(ds.filename, "r") as tmp:
                 self.assertIsInstance(tmp, io_class_)
     
     def test_not_bed_exception(self):
         with self.assertRaises(ValueError):
-            dataio.read_bed("test.bed.bz2")
+            bedio.open_param("test.bed.bz2", "r")
 
         with self.assertRaises(ValueError):
-            dataio.read_bed("test.vcf.gz")
+            bedio.open_param("test.vcf.gz", "r")
 
         with self.assertRaises(ValueError):
-            dataio.read_bed("bed.txt")
+            bedio.open_param("bed.txt", "r")
 
         with self.assertRaises(ValueError):
-            dataio.read_bed("test_bed.gz")
+            bedio.open_param("test_bed.gz", "r")
 
 
 class TestParameterFileParser(unittest.TestCase):
@@ -231,7 +231,7 @@ class TestParameterFileParser(unittest.TestCase):
 
         for ds in FILE_IO_DATA:
 
-            with dataio.read_bed(ds.filename) as fpar:
+            with bedio.open_param(ds.filename, "r") as fpar:
 
                 for key, meta_val in ds.meta.items():
                     self.assertEqual(meta_val, fpar.meta[key])
@@ -243,7 +243,7 @@ class TestParameterFileParser(unittest.TestCase):
 
         for ds in FILE_IO_DATA:
 
-            with dataio.read_bed(ds.filename) as fpar:
+            with bedio.open_param(ds.filename, "r") as fpar:
 
                 gene_idx = 0
                 record_idx = 0
@@ -283,7 +283,7 @@ class TestParameterFileParser(unittest.TestCase):
 
     def test_no_name(self):
         with self.assertRaises(NotImplementedError):
-            tmp = dataio.ParseParamBedABC()
+            tmp = bedio.ParseParamBedABC()
 
 
 

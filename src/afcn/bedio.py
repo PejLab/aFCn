@@ -2,7 +2,6 @@ import io
 import itertools
 import numpy as np
 import gzip
-from pysam import VariantFile
 
 # TODO how to manage specification version, e.g. code may 
 # change but spec does not.
@@ -10,47 +9,68 @@ from pysam import VariantFile
 # to __main__.py and this code
 
 
-def read_bed(filename):
-    """Read either gzipped or normal text file.
+def open_param(filename, mode):
+    """Open either gzipped or normal text file for reading.
 
     Args:
         filename: (str) either .bed or .bed.gz file
+        mode: (char) "r" for read, "w" for write
 
     Returns:
         returns instance of class that mimics / uses io.FileIO
         services
     """
 
-    if filename.endswith(".bed.gz"):
+    if (not filename.endswith(".bed.gz") and 
+        not filename.endswith(".bed")):
+
+        raise ValueError("Not a bed file.")
+
+    if mode == "r" and filename.endswith(".bed.gz"):
         return ParseParamGzipBed(filename)
 
-    elif filename.endswith(".bed"):
+    elif mode == "r" and filename.endswith(".bed"):
         return ParseParamBed(filename)
 
-    raise ValueError("Not a bed file.")
+    raise NotImplementedError
 
 
-class ParseParamBedABC:
-    """Enforce parameter bed file specification."""
+def write_bed(filename):
+    if not filename.endswith(".bed"):
+        raise ValueError("Require .bed file extenstion.")
+
+    if os.path.exists(filename):
+        pass
+
+
+class BedABC:
     _meta_prefix = "##"
     _meta_data_key_val_delimiter = "="
 
     _header_prefix = "#"
+
+    _colname_to_idx  = dict()
+
+    _field_delimiter = "\t"
+
+    def __init__(self):
+        self.meta = dict()
+        self.header = None
+
+
+class ParseParamBedABC(BedABC):
+    """Enforce parameter bed file specification."""
     _req_header_fields = ("chrom", "start", "end", "qtl_id", 
                           "gene_start", "gene_end", "gene_id",
                           "variant_pos", "variant_id", 
                           "ref", "alt", "log2_afc")
-    _colname_to_idx  = dict()
-
-    _field_delimiter = "\t"
 
     def __init__(self):
 
         if not hasattr(self, "name"):
             raise NotImplementedError
 
-        self.meta = dict()
-        self.header = None
+        super().__init__()
 
         # Note: if the initialization fails, the context manager methods
         # will not be called, in this case, close file object if
@@ -168,71 +188,6 @@ class ParseParamGzipBed(gzip.GzipFile, ParseParamBedABC):
         return gzip.GzipFile.__next__(self).decode()
 
 
-#def open_vcf(vcf):
-#    if not os.exists(f"{vcf}.tbi"):
-#        raise ValueError("Need tabix index for vcf file.")
-#
-#    return VariantFile(vcf, index_filename=f"{vcf}.tbi")
-#
-#
-#class GenotypeBuffer:
-#    def __init__(self, n_max_vars, n_samples):
-#        self._buffer = np.zeros(shape=(n_max_vars, n_samples))
-#        self._rows = 0
-#        self._cols = 0
-#
-#    def reset(self):
-#        self._rows = 0
-#        self._cols = 0
-#
-#    @property
-#    def size(self):
-#        return self._rows * self._cols
-#
-#    @property
-#    def shape(self):
-#        return self._rows, self._cols
-#
-#
-#class GenotypeVcfParser:
-#    def __init__(fvcf, half_interval=500000):
-#        self.filename = fvcf.filename.decode()
-#        self._fid = fvcf
-#        self.half_interval = cis_half_interval
-#        self._n_samples = len(fvcf.header.samples)
-#        self._hap_one_genotype = GenotypeBuffer(10000, self._nsamples)
-#        self._hap_two_genotype = GenotypeBuffer(10000, self._nsamples)
-#    
-#    @property
-#    def contig_len(self, name):
-#        return self._fid.header.contigs[name].length
-#
-#    def get_variant_genotypes(self, chrom, pos):
-#        # remember that fetch always returns a Tabix Iterator object
-#        variant = next(self._fid.fetch(chrom, pos-1, pos))
-#
-#        
-#        for i, samp_obj in enumerate(variant):
-#            data[i]
-#        return geneotype.allele_indices
-#
-#
-#    def cis_variant_genotypes(self, chrom, tss):
-#        
-#        start = tss - self.half_interval
-#
-#        if start < 0:
-#            start = 0
-#
-#        end = tss + self.half_interval
-#
-#        if end > self.contig_len[chrom]:
-#            end = self.contig_len[chrom]
-#
-#        for variants in self._fid.fetch(chrom, start, end):
-#            pass
-#
-#    
-
-
-# class ParameterFileWriter
+class WritePredictionBed(BedABC):
+    def __init__(self):
+        pass
