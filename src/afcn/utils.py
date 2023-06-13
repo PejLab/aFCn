@@ -40,14 +40,18 @@ def get_version(file=None):
     if file is None:
         file = os.path.join(os.path.dirname(__file__), "__init__.py")
 
+    found_version_line = False
+
     with open(file, "r") as fid:
 
         for tline in fid:
             if re.search("__version__", tline) is not None:
+                found_version_line = True
                 break
             
-    if (tmp := re.search("\w+\.\w+\.\w+", tline)) is None:
-        return tmp
+    if (not found_version_line or 
+        (tmp := re.search("\w+\.\w+\.\w+", tline)) is None):
+        return None
 
     return tmp.group()
 
