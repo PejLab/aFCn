@@ -1,4 +1,5 @@
-from unittest import TestCase, main
+from unittest import TestCase, main, mock
+import io
 import numpy as np
 from afcn import utils
 
@@ -49,6 +50,34 @@ class TestIsBiallelic(TestCase):
     def test_exception(self):
         with self.assertRaises(TypeError):
             utils.is_biallelic(np.array([0,None,2]))
+
+
+class Testget_version(TestCase):
+    def _file_str(self, version):
+        return "\n".join(("Docstring", 
+                        "from . import predict",
+                        "",
+                        f"__version__ = {version}"))
+
+    def test_version(self):
+        for version in ["1.01.1dev1", "1.0.1", "0.0.0"]:
+
+            with mock.patch("builtins.open", 
+                            mock.mock_open(read_data=self._file_str(version))):
+
+                self.assertEqual(version,
+                        utils.get_version(file="irrelevant"))
+
+    def test_incompatible_version(self):
+        for version in ["01.1dev1", "1.0", "0"]:
+
+            with mock.patch("builtins.open", 
+                            mock.mock_open(read_data=self._file_str(version))):
+
+                self.assertIsNone(utils.get_version(file="irrelevant"))
+        
+
+
 
 
 if __name__ == "__main__":

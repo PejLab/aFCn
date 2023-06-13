@@ -4,6 +4,8 @@ By: Genomic Data Modeling Lab
 """
 
 import numbers
+import os
+import re
 import numpy as np
 
 NUMPY_NUMERIC_DTYPE_KINDS = ("f", "u", "i")
@@ -31,3 +33,21 @@ def is_biallelic(x):
 
     return np.setdiff1d(data_set, 
                         np.array([0,1])).size == 0
+
+
+def get_version(file=None):
+
+    if file is None:
+        file = os.path.join(os.path.dirname(__file__), "__init__.py")
+
+    with open(file, "r") as fid:
+
+        for tline in fid:
+            if re.search("__version__", tline) is not None:
+                break
+            
+    if (tmp := re.search("\w+\.\w+\.\w+", tline)) is None:
+        return tmp
+
+    return tmp.group()
+
