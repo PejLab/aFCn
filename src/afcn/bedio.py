@@ -1,7 +1,18 @@
+"""IO tools for afcn bed files.
+
+By: GDML
+"""
+
+import os
 import io
 import itertools
-import numpy as np
+from collections import OrderedDict
 import gzip
+from datetime import datetime
+
+import numpy as np
+
+from . import utils
 
 # TODO how to manage specification version, e.g. code may 
 # change but spec does not.
@@ -26,66 +37,86 @@ def open_param(filename, mode):
 
         raise ValueError("Not a bed file.")
 
-    if mode == "r" and filename.endswith(".bed.gz"):
-        return ParseParamGzipBed(filename)
+    if not os.path.exists(filename):
+        raise FileNotFoundError(filename)
 
-    elif mode == "r" and filename.endswith(".bed"):
-        return ParseParamBed(filename)
+    if mode == "r" and filename.endswith(".bed"):
+        return ParseParamBed(io.FileIO(filename, mode))
+
+    elif mode == "r" and filename.endswith(".bed.gz"):
+        return ParseParamBed(gzip.GzipFile(filename))
 
     raise NotImplementedError
 
 
-def write_bed(filename):
-    if not filename.endswith(".bed"):
-        raise ValueError("Require .bed file extenstion.")
+class BedSpec:
+    _encoding = "utf-8"
 
-    if os.path.exists(filename):
-        pass
-
-
-class BedABC:
     _meta_prefix = "##"
     _meta_data_key_val_delimiter = "="
 
     _header_prefix = "#"
 
-    _colname_to_idx  = dict()
-
     _field_delimiter = "\t"
+    _new_line = "\n"
 
-    def __init__(self):
-        self.meta = dict()
+    def __init__(self, *_):
+        _date = datetime.today()
+        _date = f"{_date.year}-{_date.month:02d}-{_date.day:02d}"
+
+        self.meta = OrderedDict(afcn_version=utils.get_version(),
+                                date = _date)
         self.header = None
+        self._colname_to_idx  = dict()
 
 
-class ParseParamBedABC(BedABC):
+class ParamBedSpec(BedSpec):
+    _req_header_fields = OrderedDict(chrom = str,
+                                     qtl_start = int,
+                                     qtl_end = int,
+                                     qtl_id = str,
+                                     gene_start = int,
+                                     gene_end = int,
+                                     gene_id = str,
+                                     variant_pos = int,
+                                     variant_id = str,
+                                     ref = str,
+                                     alt = str,
+                                     log2_afc = float)
+
+
+class ParseParamBedABC(ParamBedSpec):
     """Enforce parameter bed file specification."""
-    _req_header_fields = ("chrom", "start", "end", "qtl_id", 
-                          "gene_start", "gene_end", "gene_id",
-                          "variant_pos", "variant_id", 
-                          "ref", "alt", "log2_afc")
 
     def __init__(self):
-
-        if not hasattr(self, "name"):
-            raise NotImplementedError
-
         super().__init__()
 
-        # Note: if the initialization fails, the context manager methods
-        # will not be called, in this case, close file object if
-        # open
         self._initialize()
 
     def __iter__(self):
-        raise NotImplementedError
+        return self
 
     def __next__(self):
-        raise NotImplementedError
+        return self._fid.__next__().decode(self._encoding)
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *args):
+        self.close()
+
+    @property
+    def closed(self):
+        return self._fid.closed
+
+    def close(self):
+        if not self.closed:
+            self._fid.flush()
+            self._fid.close()
 
     def _initialize(self):
         """Load and validate meta data and header as defined in spec."""
-        for idx, col_name in enumerate(self._req_header_fields):
+        for idx, col_name in enumerate(self._req_header_fields.keys()):
             self._colname_to_idx[col_name] = idx
 
         for par_line in self:
@@ -104,6 +135,8 @@ class ParseParamBedABC(BedABC):
             self.meta[key.strip()] = val.strip()
 
         # decompose header and verify it is spec. compliant
+        # remember that for empty files par_line is not associated 
+        # with any value and throws an UnboundLocalError
         try:
             par_line = par_line.removeprefix(self._header_prefix)
         except UnboundLocalError as err:
@@ -115,12 +148,9 @@ class ParseParamBedABC(BedABC):
                         "that file {self.name} is empty.",)
             raise UnboundLocalError(err) from None
 
-        if not par_line.startswith(self._req_header_fields[0]):
-            raise ValueError("Header must be present")
-
         self.header = par_line.strip().split(sep=self._field_delimiter)
 
-        for i, field_name in enumerate(self._req_header_fields):
+        for i, field_name in enumerate(self._req_header_fields.keys()):
 
             if field_name != self.header[i]:
                 raise ValueError(f"Invalid file header for {self.name}")
@@ -130,7 +160,26 @@ class ParseParamBedABC(BedABC):
             return None
 
         for record in self:
-            yield record.strip().split(self._field_delimiter)
+
+            output = record.strip().split(self._field_delimiter)
+
+            i = 0
+            for _, field_type in self._req_header_fields.items():
+                output[i] = field_type(output[i])
+                i += 1
+
+            for out_val in output[i:]:
+
+                if utils.is_int(out_val):
+                    out_val = int(out_val)
+                elif utils.is_float(out_val):
+                    out_val = float(out_val)
+
+                output[i] = out_val
+
+                i += 1
+
+            yield output
 
     def idx(self, col_name):
         return self._colname_to_idx[col_name]
@@ -155,39 +204,123 @@ class ParseParamBedABC(BedABC):
             yield k, g
 
 
-class ParseParamBed(io.FileIO, ParseParamBedABC):
-    def __init__(self, filename):
+class ParseParamBed(ParseParamBedABC):
+    def __init__(self, fid):
 
-        io.FileIO.__init__(self, filename)
+        self._fid = fid
 
         try:
-            ParseParamBedABC.__init__(self)
+            super().__init__()
         except:
-            if not self.closed:
-                self.close()
-
+            self.close()
             raise
 
-    def __next__(self):
-        return io.FileIO.__next__(self).decode()
 
-
-class ParseParamGzipBed(gzip.GzipFile, ParseParamBedABC):
-    def __init__(self, filename):
-
-        gzip.GzipFile.__init__(self, filename)
-
-        try:
-            ParseParamBedABC.__init__(self)
-        except:
-            if not self.closed:
-                self.close()
-                raise
-
-    def __next__(self):
-        return gzip.GzipFile.__next__(self).decode()
-
-
-class WritePredictionBed(BedABC):
+# TODO
+class WriteParamBed(ParamBedSpec):
     def __init__(self):
-        pass
+        raise NotImplementedError
+
+
+def open_predict(filename, mode):
+
+    if not os.path.exists(filename):
+        return FileNotFoundError(filename)
+
+    if mode == "r":
+        raise NotImplementedError
+    elif mode == "w":
+        return WritePredictionBed(io.FileIO(filename, mode))
+
+    raise ValueError("Uninterpretable mode")
+
+
+class PredictionBedABC(BedSpec):
+    """Prediction bed doc string."""
+    _req_header_fields = OrderedDict(chrom = str, 
+                                     start = int,
+                                     end = int,
+                                     gene_id = str)
+
+
+class WritePredictionBed(PredictionBedABC):
+    """Buffered write of data to prediction bed file.
+
+    Args:
+        fid: (file object)
+    """
+    def __init__(self, fid):
+        self._fid = fid
+        self.sample_names = None
+        self._meta_and_header_written = False
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *args):
+        if not self.closed:
+            self.close()
+
+    @property
+    def closed(self):
+        return self._fid.closed
+
+    def close(self):
+        if not self.closed:
+            self.flush()
+            self._fid.close()
+
+    def write_meta_data(self, sample_names):
+        # instantiate string
+        s = ""
+
+        # construct meta data
+        for key, val in self.meta.items():
+            s += "".join([self._meta_prefix,
+                          key,
+                          self._meta_data_key_val_delimiter,
+                          val,
+                          self._new_line])
+
+        # construct header
+        s += self._header_prefix
+        s += self._field_delimiter.join([*self._req_header_fields.keys(),
+                                         *sample_names])
+        s += self._new_line
+        s = s.encode(encoding=self._encoding)
+
+        if self._fid.write(s) != len(s):
+            raise RuntimeError("Bytes written not equal to bytes of string.")
+
+        self._meta_and_header_written = True
+
+    def write_line_record(self, chrom, start, end, name, data):
+        """Write line of predictions.
+
+        Args:
+            chrom: (str) chromosome name
+            start: (int) genomic coordinate of gene beginning
+            end: (int) genomic coordinate of gene end
+            name: (str) gene id
+            data: ((n sample, ) np.ndarray) of floats representing predicted
+                gene expression.
+
+        Returns:
+            None
+        """
+        if not self._meta_and_header_written:
+            self.write_meta_data()
+
+        data_str = self._field_delimiter.join([str(w) for w in data])
+        data_str += self._new_line
+
+        record_str = self._field_delimiter.join([chrom, 
+                                                str(start), 
+                                                str(end), 
+                                                name,
+                                                data_str])
+        record_str = record_str.encode(encoding=self._encoding)
+
+        if self._fid.write(record_str) != len(record_str):
+            raise RuntimeError("Bytes written not equal to bytes of string.")
+
