@@ -99,13 +99,13 @@ Contents:
     - etc.
 * BED fields labeled: 
     - #chrom, 
-    - start: (int) minimum(variant position, gene position)
-    - end: (int) maximum(variant position, gene position)
+    - qtl_start: (int) minimum(variant position, gene position)
+    - qtl_end: (int) maximum(variant position, gene position)
     - qtl_id: (string) gene_id/variant_id
 * custom fields:
-    - gene_start: (integer) transcription start site of gene
-    - gene_end: (integer) end of gene
-    - gene_id: (string) Ensembl gene id
+    - gene_start: (integer) start of genomic feature
+    - gene_end: (integer) end of genomic feature
+    - gene_id: (string) gene name
     - variant_pos: (integer) variant genomic coordinates from VCF
     - variant_id: (string)
     - ref: (char) reference allele
@@ -136,7 +136,7 @@ Contents:
     - ##vcf_file=(str)
     - ##parameter_file=(str)
 * BED fields labeled: 
-    - #chrm, start, end, gene_id
+    - #chrom, start, end, name
 * custom fields:
     - sample_id: (float) predicted gene expression per sample
 """)
