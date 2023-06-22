@@ -8,16 +8,15 @@ def read_vcf(vcf):
     if not os.exists(f"{vcf}.tbi"):
         raise ValueError("Need tabix index for vcf file.")
 
-    return ParseGenotypes(vcf, index_filename=f"{vcf}.tbi")
-
-
-
-
-
+    return ParseGenotypes(vcf, "r", index_filename=f"{vcf}.tbi")
 
 
 # TODO need to figure out indexing rules.
 class ParseGenotypes(VariantFile):
+    @property
+    def samples(self):
+        return self.header.samples
+
     @property
     def n_samples(self):
         return len(self.header.samples)
