@@ -77,6 +77,94 @@ class Testget_version(TestCase):
                 self.assertIsNone(utils.get_version(file="irrelevant"))
         
 
+class Test_is_int(TestCase):
+    def test_correct(self):
+        self.assertTrue(utils.is_int("-2323"))
+        self.assertTrue(utils.is_int("3"))
+        self.assertTrue(utils.is_int("+363464"))
+        self.assertTrue(utils.is_int("3464"))
+        self.assertTrue(utils.is_int("0"))
+
+    def test_not_int(self):
+        self.assertFalse(utils.is_int("423.32"))
+        self.assertFalse(utils.is_int("-423.32"))
+        self.assertFalse(utils.is_int("0.0"))
+        self.assertFalse(utils.is_int("0."))
+        self.assertFalse(utils.is_int("+0."))
+        self.assertFalse(utils.is_int("+.5343"))
+        self.assertFalse(utils.is_int("-.5343"))
+        self.assertFalse(utils.is_int(".5343"))
+        self.assertFalse(utils.is_int("a"))
+        self.assertFalse(utils.is_int("3a"))
+        self.assertFalse(utils.is_int("3.a"))
+        self.assertFalse(utils.is_int("3-a"))
+        self.assertFalse(utils.is_int("-a3"))
+        self.assertFalse(utils.is_int("-\.3"))
+        self.assertFalse(utils.is_int("-?3"))
+
+    def test_exceptions(self):
+        with self.assertRaises(TypeError):
+            utils.is_int(5)
+
+        with self.assertRaises(TypeError):
+            utils.is_int(5.3434)
+
+        with self.assertRaises(TypeError):
+            utils.is_int(True)
+
+        with self.assertRaises(TypeError):
+            utils.is_int(["the", "cat"])
+
+        with self.assertRaises(TypeError):
+            utils.is_int(["1", "2"])
+
+        with self.assertRaises(TypeError):
+            utils.is_int(("1", "2"))
+
+
+class Test_is_float(TestCase):
+    def test_correct(self):
+        self.assertTrue(utils.is_float("-23.23"))
+        self.assertTrue(utils.is_float("3."))
+        self.assertTrue(utils.is_float("+363464."))
+        self.assertTrue(utils.is_float("3.464"))
+        self.assertTrue(utils.is_float("0."))
+
+    def test_not_float(self):
+        self.assertFalse(utils.is_float(".42332"))
+        self.assertFalse(utils.is_float("-42332"))
+        self.assertFalse(utils.is_float(".0"))
+        self.assertFalse(utils.is_float("0"))
+        self.assertFalse(utils.is_float("+0"))
+        self.assertFalse(utils.is_float("+5343"))
+        self.assertFalse(utils.is_float("-5343"))
+        self.assertFalse(utils.is_float(".5343"))
+        self.assertFalse(utils.is_float("a"))
+        self.assertFalse(utils.is_float("3a"))
+        self.assertFalse(utils.is_float("3.a"))
+        self.assertFalse(utils.is_float("3-a"))
+        self.assertFalse(utils.is_float("-a3"))
+        self.assertFalse(utils.is_float("-\.3"))
+        self.assertFalse(utils.is_float("-?3"))
+
+    def test_exceptions(self):
+        with self.assertRaises(TypeError):
+            utils.is_float(5)
+
+        with self.assertRaises(TypeError):
+            utils.is_float(5.3434)
+
+        with self.assertRaises(TypeError):
+            utils.is_float(True)
+
+        with self.assertRaises(TypeError):
+            utils.is_float(["the", "cat"])
+
+        with self.assertRaises(TypeError):
+            utils.is_float(["1", "2"])
+
+        with self.assertRaises(TypeError):
+            utils.is_float(("1", "2"))
 
 
 

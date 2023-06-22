@@ -55,3 +55,12 @@ def get_version(file=None):
 
     return tmp.group()
 
+
+def is_int(string_value):
+    """Check whether input string is an integer."""
+    return re.match("^[+-]?\d+$", string_value) is not None
+
+
+def is_float(string_value):
+    """Check whether input string is a floating point number."""
+    return re.match("^[+-]?\d+\.\d*$", string_value) is not None
