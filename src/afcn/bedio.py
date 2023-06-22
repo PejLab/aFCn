@@ -250,8 +250,9 @@ class WritePredictionBed(PredictionBedABC):
         fid: (file object)
     """
     def __init__(self, fid):
+        super().__init__()
+
         self._fid = fid
-        self.sample_names = None
         self._meta_and_header_written = False
 
     def __enter__(self):
@@ -267,7 +268,7 @@ class WritePredictionBed(PredictionBedABC):
 
     def close(self):
         if not self.closed:
-            self.flush()
+            self._fid.flush()
             self._fid.close()
 
     def write_meta_data(self, sample_names):
@@ -309,7 +310,7 @@ class WritePredictionBed(PredictionBedABC):
             None
         """
         if not self._meta_and_header_written:
-            self.write_meta_data()
+            raise ValueError("Write meta data before real data")
 
         data_str = self._field_delimiter.join([str(w) for w in data])
         data_str += self._new_line
