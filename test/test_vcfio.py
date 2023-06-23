@@ -1,7 +1,9 @@
 """Tests of for vcf parsing"""
 
-from unittest import TestCase, main
+import os
 from collections import OrderedDict
+import unittest
+import tempfile
 
 import pysam
 
@@ -124,6 +126,9 @@ class VCFDataSet:
                        VCFStructureMetaInfoLine("FILTER",
                                                 "ID=q10",
                                                 "Description=\"Qualtiy score below 10\""),
+                       VCFStructureMetaInfoLine("FILTER",
+                                                "ID=s50",
+                                                "Description=\"Less than 50% of samples with genotype.\""),
                        VCFStructureMetaInfoLine("FORMAT",
                                                 "ID=GT",
                                                 "Number=1",
@@ -151,6 +156,9 @@ class VCFDataSet:
                         ["0|0:34", "0|2:20","1|2:21"]),
               VCFRecord("chrm10",101002,"var_4", "T", "A", 21, "PASS", 
                         "SD=12;RD=52", "GT:GQ", 
+                        ["0|0:34", "1|1:20","1|0:21"]),
+              VCFRecord("chrm10",101012,"var_5", "T", "A", 1, "q10;s50", 
+                        "SD=12;RD=52", "GT:GQ", 
                         ["0|0:34", "1|1:20","1|0:21"])]
 
     def __str__(self):
@@ -159,7 +167,8 @@ class VCFDataSet:
             output_string += meta_info.to_string() + self._new_line
 
         for struct_meta_info in self.structured_meta:
-            output_string += struct_meta_info.to_string() + self._new_line
+            output_string += (struct_meta_info.to_string() +
+                              self._new_line)
 
         output_string += self._col_delim.join(self.header) + self._new_line
 
@@ -168,11 +177,40 @@ class VCFDataSet:
 
         return output_string.strip()
 
-class TestVCF(TestCase):
-    def test_init(self):
-        vcf = VCFDataSet()
-        print(vcf)
 
+def setUpModule():
+    global vcf_data 
+    global vcf_dir 
+    global vcf_name
+
+    vcf_data = VCFDataSet()
+    vcf_dir = tempfile.TemporaryDirectory()
+
+    print(os.listdir(vcf_dir.name))
+
+    tmp_vcf_name = os.path.join(vcf_dir.name, "tmp.vcf")
+
+    with open(tmp_vcf_name, "w") as fid:
+        fid.write(str(vcf_data))
+
+    vcf_name = pysam.tabix_index(tmp_vcf_name,
+                                 preset="vcf")
+    print(vcf_name)
+
+def tearDownModule():
+    print(os.listdir(vcf_dir.name))
+    vcf_dir.cleanup()
+    if os.path.exists(vcf_dir.name):
+        print("didnt work")
+    else:
+        print("worked")
+
+
+class TestVCF(unittest.TestCase):
+    def test_init(self):
+        pass
 
 if __name__ == "__main__":
-    main()
+    unittest.addModuleCleanup(tearDownModule)
+    unittest.main()
+    unittest.doModuleCleanup()
