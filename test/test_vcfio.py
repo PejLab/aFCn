@@ -3,9 +3,13 @@
 import os
 from collections import OrderedDict
 import unittest
+import re
 import tempfile
 
+import numpy as np
 import pysam
+
+from afcn import vcfio
 
 class VCFMetaInfoABC:
     _line_prefix = "##"
@@ -69,6 +73,7 @@ class VCFMetaInfoLine(VCFMetaInfoABC):
 
 class VCFRecord:
     _col_delim = "\t"
+    _phase_delim = "|"
 
     def __init__(self, chrom, pos, id_, ref, alt, 
                  qual, filt, info, format_,
@@ -83,6 +88,31 @@ class VCFRecord:
         self.info = info
         self.format = format_
         self.samples = samples
+
+    @property
+    def genotypes(self):
+        genos = np.zeros(shape=(2, len(self.samples)))
+
+        for i, samp in enumerate(self.samples):
+            tmp = re.findall("^(\d)[|/](\d)", samp)[0]
+
+            genos[0, i] = int(tmp[0])
+            genos[1, i] = int(tmp[1])
+
+        return genos
+
+    def is_phased(self):
+        for samp in self.samples:
+            if re.match("^\d\|\d:?\w*$", samp) is None:
+                return False
+        return True
+
+    def is_biallelic(self):
+        for samp in self.samples:
+            if re.match("^[01][\|/][01]:?\w*$", samp) is None:
+                return False
+
+        return True
 
     def to_string(self):
         return self._col_delim.join([self.chrom,
@@ -106,7 +136,7 @@ class VCFDataSet:
             VCFMetaInfoLine("fileDate","20230622"),
             VCFMetaInfoLine("source","No Source, this is a 'dummy' VCF"),
             VCFMetaInfoLine("reference","No reference"),
-            VCFMetaInfoLine("phasing","True")]
+            VCFMetaInfoLine("phasing","Mixed")]
 
     structured_meta = [VCFStructureMetaInfoLine("contig",
                                                 "ID=chromFicticious",
@@ -157,9 +187,15 @@ class VCFDataSet:
               VCFRecord("chrm10",101002,"var_4", "T", "A", 21, "PASS", 
                         "SD=12;RD=52", "GT:GQ", 
                         ["0|0:34", "1|1:20","1|0:21"]),
-              VCFRecord("chrm10",101012,"var_5", "T", "A", 1, "q10;s50", 
+              VCFRecord("chrm10",101003,"var_5", "T", "A", 21, "PASS", 
                         "SD=12;RD=52", "GT:GQ", 
-                        ["0|0:34", "1|1:20","1|0:21"])]
+                        ["0|0:34", "1/1:20","1|0:21"]),
+              VCFRecord("chrm10",101012,"var_6", "T", "A", 1, "q10;s50", 
+                        "SD=12;RD=52", "GT:GQ", 
+                        ["0|0:34", "1|1:20","1|0:21"]),
+              VCFRecord("chrm10",101103,"var_7", "T", "A", 21, "q10", 
+                        "SD=12;RD=52", "GT:GQ", 
+                        ["0|0:34", "1/1:20","1|0:21"])]
 
     def __str__(self):
         output_string = ""
@@ -186,8 +222,6 @@ def setUpModule():
     vcf_data = VCFDataSet()
     vcf_dir = tempfile.TemporaryDirectory()
 
-    print(os.listdir(vcf_dir.name))
-
     tmp_vcf_name = os.path.join(vcf_dir.name, "tmp.vcf")
 
     with open(tmp_vcf_name, "w") as fid:
@@ -195,20 +229,84 @@ def setUpModule():
 
     vcf_name = pysam.tabix_index(tmp_vcf_name,
                                  preset="vcf")
-    print(vcf_name)
 
 def tearDownModule():
-    print(os.listdir(vcf_dir.name))
     vcf_dir.cleanup()
-    if os.path.exists(vcf_dir.name):
-        print("didnt work")
-    else:
-        print("worked")
 
 
 class TestVCF(unittest.TestCase):
-    def test_init(self):
-        pass
+    def setUp(self):
+        self.vcf = vcfio.ParseGenotypes(vcf_name, "r")
+
+    def test_properties(self):
+        # equal sample size and equal sample names
+        self.assertEqual(self.vcf.n_samples, len(vcf_data.samples))
+
+        for test_val,true_val in zip(self.vcf.samples,vcf_data.samples):
+            self.assertEqual(test_val, true_val)
+
+    def test_genotypes_unphased_data(self):
+        """Verify genotype records for unphased data."""
+        for record in vcf_data.records:
+
+            if record.is_phased():
+                continue
+
+            out = self.vcf.get_biallelic_genotypes(record.chrom,
+                                                   record.pos)
+
+            if out is None:
+                continue
+
+            self.assertFalse(out["phased"])
+
+            true_genotypes = np.sum(record.genotypes, 0)
+
+            self.assertTupleEqual(true_genotypes.shape,
+                                  out["genotypes"].shape)
+
+            for data_val, true_val in zip(out["genotypes"], true_genotypes):
+                self.assertEqual(data_val, true_val)
+
+
+    def test_genotype_return_none(self):
+        """Verify that None for multiallelic and filtered variants.
+        """
+        for record in vcf_data.records:
+
+            out = self.vcf.get_biallelic_genotypes(record.chrom,
+                                                   record.pos)
+
+            if not record.is_biallelic() or record.filter != "PASS":
+                self.assertIsNone(out)
+            else:
+                self.assertIsNotNone(out)
+
+
+    def test_genotype_phased_data(self):
+        """Verify genotype records for phased data."""
+
+        for record in vcf_data.records:
+            if not record.is_phased():
+                continue
+
+            out = self.vcf.get_biallelic_genotypes(record.chrom,
+                                                   record.pos)
+
+            if out is None:
+                continue
+
+            self.assertTrue(out["phased"])
+
+            true_genotypes = record.genotypes
+
+            self.assertTupleEqual(out["genotypes"].shape, (2, len(self.vcf.samples)))
+
+            for i in range(len(record.samples)):
+                self.assertEqual(true_genotypes[0, i], out["genotypes"][0, i])
+                self.assertEqual(true_genotypes[1, i], out["genotypes"][1, i])
+
+        
 
 if __name__ == "__main__":
     unittest.addModuleCleanup(tearDownModule)

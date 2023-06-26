@@ -4,6 +4,8 @@ src/build
 *~
 *.DS_Store
 *.swp
+*.coverage
 *egg-info/
+htmlcov/
 *__pycache__/
 *.ipynb_checkpoints/
