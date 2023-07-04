@@ -7,6 +7,10 @@ import unittest
 
 from afcn import bedio
 
+# TODO need to update so that temp data makes use of
+# tempfile module in Python standard library
+
+
 TEST_DIR = os.path.join(os.path.dirname(__file__),
                         "tmp_test_data")
 
@@ -278,10 +282,6 @@ class TestParameterFileParser(unittest.TestCase):
     def test_no_name(self):
         with self.assertRaises(AttributeError):
             tmp = bedio.ParseParamBedABC()
-
-
-
-
 
 
 

@@ -4,61 +4,67 @@ By: Genomic Data Modeling Lab
 """
 
 import os
-import logging
 import numpy as np
 
 from . import model
-from . import dataio
+from . import bedio
+from . import vcfio
 
 
 FIELD_DELIMITER = "\t"
 N_LINES = 500
 
-logging.basicConfig(filename=os.path.join(args.output_dir, 
-                                          "predictions.log"),
-                    format="%(asctime)s %(levelname)s : %(message)s",
-                    level = logging.INFO)
-
-
 
 def run(vcf, par_file, output_dir):
 
-    logging.INFO("Start: gene expression predictions")
-    logging.INFO(f"vcf file:{vcf}")
-    logging.INFO(f"parameter file:{par_file}")
-
     output_file = os.path.join(output_dir, "predictions.bed")
 
+    reference_expression = 0
+
     # open all files
-    with (dataio.read_bed(par_file) as fpars,
-          dataio.read_vcf(vcf) as fvcf,
-          dataio.open_bed(output_file, "w") as fout):
+    with (bedio.open_param(par_file, "r") as fpars,
+          vcfio.read_vcf(vcf) as fvcf,
+          bedio.open_predict(output_file, "w") as fout):
 
-        #vcf_pars = dataio.GenotypeVcfParser(fvcf)
+        # write meta data to output_file
+        fout.meta["vcf"] = vcf
+        fout.meta["parameter_file"] = par_file
+        fout.sample_names = fvcf.samples
 
-        for gene_id, records in fpars.group_by("gene_id"):
+        # Perform gene expression predictions
 
-            log2_afc = np.zeros(len(records))
+        for gene_id, variants in fpars.group_by("gene_id"):
 
-            #for i, record in enumerate(records):
-            #    log2_afc[i] = record[fpars.idx("log2_afc")]
-            #    
-            #    hap_one, hap_two = fvcf.fetch(record[fpars.idx("chrm")],
-            #                            record[fpars.idx("pos")])
+            log2_afc = np.zeros(len(variants))
+            hap_one = np.zeros(shape=(len(variants), fvcf.n_samples))
+            hap_two = np.zeros(shape=(len(variants), fvcf.n_samples))
 
+            # get sample genotypes of each gene associated variant
+            for i, v in enumerate(variants):
 
+                log2_afc[i] = v[fpars.idx("log2_afc")]
 
-            # compute gene expression
+                tmp = fvcf.get_biallelic_genotypes(v[fpars.idx("chrm")],
+                                                   v[fpars.idx("pos")])
 
+                if not tmp["phased"]:
+                    raise ValueError(("Data are not phased, "
+                                    "as is required."))
 
+                hap_one[i, :] = tmp["genotypes"][0,:]
+                hap_two[i, :] = tmp["genotypes"][1,:]
 
+            # given haplotypes and parameters compute expected gene expression
+            gene_expr = model.predict(hap_one.T,
+                                      hap_two.T,
+                                      reference_expression,
+                                      log2_afc).astype(str)
 
+            # not all rec values from this iteration of record should
+            # have identical genomic coordinates.
 
-
-    # organize data to be compatible with model.predict
-    # make prediction, add to buffer
-
-    logging.INFO(f"output written to:{output_dir/predictions.bed}")
-    logging.INFO("Finished")
-
-
+            fout.write(rec[fpars.idx("chrm")],
+                       v[fpars.idx("gene_start")],
+                       v[fpars.idx("gene_end")],
+                       gene_id,
+                       *gene_expr)
