@@ -35,8 +35,8 @@ def main():
     parser.add_argument("--nthreads", "-j", required=False, default="1", help="Number of threads to do fitting on")
     parser.add_argument("--conf", action="store_true", required=False, help="Calculate confidence intervals for aFC estimates")
 
-    parser.add_argument("--normalize", action="store_true", required=False, help="Expressions matrix has not been normalized yet")
-    parser.add_argument("--logtransform", action="store_true", required=False, help="Expressions matrix has not been log transformed yet")
+    parser.add_argument("--normalize", action="store_true", required=False, help="This will log-transform and normalize expression file")
+    parser.add_argument("--logtransform", action="store_true", required=False, help="This will log-transforme the expression file")
     parser.add_argument("--redo", action="store_true", required=False, help="Filter out low quality eqtls based on confidence intervals")
     parser.add_argument("--splitexpr", action="store_true", required=False, help='If set, the individual names in the expressions file will be split on "-" characters and the parts of the name on the two side of the first "-" character will be retained.')
     parser.add_argument("--gct", action="store_true", required=False, help="Expressions matrix is in gct format (tab separated with a Description column)")
