@@ -50,7 +50,7 @@ Calculating aFCs with confidence intervals using 12 cores, with the expressions 
 python3 afcn.py --gct -j 12 --conf --vcf input_vcf.gz --expr input_expressions.gz --eqtl eqtls.txt --output output.txt
 ```
 
-Calculating aFCs with confidence intervals using 12 cores, with the expressions being log transformed and normalized:
+Calculating aFCs with confidence intervals using 12 cores, with the expressions being log transformed and normalized (--logtransform will do log-transform, --normalize will do log-transform and normalization) :
 ```
 python3 afcn.py --normalize --logtransform -j 12 --conf --vcf input_vcf.gz --expr input_expressions.gz --eqtl eqtls.txt --output output.txt
 ```
