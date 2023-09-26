@@ -312,17 +312,17 @@ def nocovar_least_squares(h1, h2, thisgene_expressions, eqtl_dataf, sa, c0, args
         if parameter in variant_list:
             
        
-            eqtl_dataf.log2_aFC[(parameter == eqtl_dataf.variant_id) & (eqtl_dataf.gene_id_clean == gene)] = result.params[parameter].value
-            eqtl_dataf.log2_aFC_error[(parameter == eqtl_dataf.variant_id) & (eqtl_dataf.gene_id_clean == gene)] = result.params[parameter].stderr
+            eqtl_dataf.log2_aFC[(parameter == eqtl_dataf.variant_id_clean) & (eqtl_dataf.gene_id_clean == gene)] = result.params[parameter].value
+            eqtl_dataf.log2_aFC_error[(parameter == eqtl_dataf.variant_id_clean) & (eqtl_dataf.gene_id_clean == gene)] = result.params[parameter].stderr
        
             if ci_unsuccessful == 0:
        
                 #get +-95% intervals
                 minus_95 = ci[parameter][1][1]
-                eqtl_dataf.log2_aFC_min_95_interv[(parameter == eqtl_dataf.variant_id) & (eqtl_dataf.gene_id_clean == gene)] = minus_95
+                eqtl_dataf.log2_aFC_min_95_interv[(parameter == eqtl_dataf.variant_id_clean) & (eqtl_dataf.gene_id_clean == gene)] = minus_95
        
                 plus_95 = ci[parameter][5][1]
-                eqtl_dataf.log2_aFC_plus_95_interv[(parameter == eqtl_dataf.variant_id) & (eqtl_dataf.gene_id_clean == gene)] = plus_95
+                eqtl_dataf.log2_aFC_plus_95_interv[(parameter == eqtl_dataf.variant_id_clean) & (eqtl_dataf.gene_id_clean == gene)] = plus_95
        
        
         else: #its C0
@@ -344,7 +344,7 @@ def nocovar_least_squares(h1, h2, thisgene_expressions, eqtl_dataf, sa, c0, args
     for lowq_eqtl in zero_list.keys():
  
         # No need for confidence intervals
-        eqtl_dataf.log2_aFC[( lowq_eqtl == eqtl_dataf.variant_id) & (eqtl_dataf.gene_id_clean == gene)] = 0
+        eqtl_dataf.log2_aFC[( lowq_eqtl == eqtl_dataf.variant_id_clean) & (eqtl_dataf.gene_id_clean == gene)] = 0
 
     return eqtl_dataf
 
@@ -403,17 +403,17 @@ def least_squares(h1, h2, thisgene_expressions, eqtl_dataf, covar, args):
         #if parameter is an s value, variant_order excludes variants with nan values
         if parameter in variant_list:
 
-            eqtl_dataf.log2_aFC[(parameter == eqtl_dataf.variant_id) & (eqtl_dataf.gene_id_clean == gene)] = result.params[parameter].value
-            eqtl_dataf.log2_aFC_error[(parameter == eqtl_dataf.variant_id) & (eqtl_dataf.gene_id_clean == gene)] = result.params[parameter].stderr
+            eqtl_dataf.log2_aFC[(parameter == eqtl_dataf.variant_id_clean) & (eqtl_dataf.gene_id_clean == gene)] = result.params[parameter].value
+            eqtl_dataf.log2_aFC_error[(parameter == eqtl_dataf.variant_id_clean) & (eqtl_dataf.gene_id_clean == gene)] = result.params[parameter].stderr
 
             if ci_unsuccessful == 0:
 
                 #get +-95% intervals
                 minus_95 = ci[parameter][1][1]
-                eqtl_dataf.log2_aFC_min_95_interv[(parameter == eqtl_dataf.variant_id) & (eqtl_dataf.gene_id_clean == gene)] = minus_95
+                eqtl_dataf.log2_aFC_min_95_interv[(parameter == eqtl_dataf.variant_id_clean) & (eqtl_dataf.gene_id_clean == gene)] = minus_95
 
                 plus_95 = ci[parameter][5][1]
-                eqtl_dataf.log2_aFC_plus_95_interv[(parameter == eqtl_dataf.variant_id) & (eqtl_dataf.gene_id_clean == gene)] = plus_95
+                eqtl_dataf.log2_aFC_plus_95_interv[(parameter == eqtl_dataf.variant_id_clean) & (eqtl_dataf.gene_id_clean == gene)] = plus_95
 
 
         else: #its C0 or one of the peer factors

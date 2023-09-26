@@ -33,13 +33,20 @@ def read_eqtls(eqtl_filename):
     #open the eqtl file
     eqtl_file = pd.read_csv(eqtl_filename, sep='\t')
     
-    #drop gene versions
-    eqtl_file['gene_id_clean'] = eqtl_file.gene_id.str.split('.').str[0]
+    # #drop gene versions
+    # eqtl_file['gene_id_clean'] = eqtl_file.gene_id.str.split('.').str[0]
     
-    if is_variant_id_format_valid(eqtl_file) == False:
+    # Clean up gene and variant IDs
+    gene_map = {gene_id: f'g{i}' for i, gene_id in enumerate(eqtl_file.gene_id.unique())}
+    eqtl_file['gene_id_clean'] = eqtl_file.gene_id.map(gene_map)
 
-        raise Exception('''Variant IDs must not begin with a digit, 
-                reformat your vcf and EQTL matrix''')
+    variant_map = {variant_id: f'v{i}' for i, variant_id in enumerate(eqtl_file.variant_id.unique())}
+    eqtl_file['variant_id_clean'] = eqtl_file.variant_id.map(variant_map)
+
+    # if is_variant_id_format_valid(eqtl_file) == False:
+
+    #     raise Exception('''Variant IDs must not begin with a digit, 
+    #             reformat your vcf and EQTL matrix''')
  
 
     return eqtl_file
@@ -49,7 +56,7 @@ def read_expressions(expressions_filename, eqtl_file, args):
 
     '''Used to read the relevant expressions into a pandas dataframe'''
     
-    chosen_genes = list(eqtl_file.gene_id_clean)
+    gene_map = eqtl_file.loc[:, ['gene_id', 'gene_id_clean']].set_index('gene_id')['gene_id_clean'].to_dict()
     expr_df = []
     expr_df_cols = []
     #open the expression file, get the expressions for the genes we have eqtls for
@@ -75,9 +82,9 @@ def read_expressions(expressions_filename, eqtl_file, args):
 
                 #try splitting the gene by version number, in 
                 #case our user forgot
-                thisgene = expr_data[0].split(".")[0]
+                thisgene = expr_data[0]
                 
-                if thisgene in chosen_genes:
+                if thisgene in gene_map:
                     expr_df.append(expr_data)
 
     expr_dataframe = pd.DataFrame(expr_df, columns=expr_df_cols)
@@ -96,7 +103,7 @@ def read_expressions(expressions_filename, eqtl_file, args):
 
  
     #now do the gene version correction once and for all if needed
-    expr_dataframe['Name'] = expr_dataframe['Name'].str.split(".").str[0]
+    expr_dataframe['Name'] = expr_dataframe['Name'].map(gene_map)
     
     return expr_dataframe
 
@@ -127,7 +134,7 @@ def read_haplotypes(vcfName, eqtl_file):
 
     '''Reads in the variants we have eqtls and expressions(genes) for'''
     
-    chosen_variants = eqtl_file.variant_id.unique()
+    variant_map = eqtl_file.loc[:, ['variant_id', 'variant_id_clean']].set_index('variant_id')['variant_id_clean'].to_dict()
 
     #match these to the vcf file
     vcf_df = []
@@ -140,10 +147,11 @@ def read_haplotypes(vcfName, eqtl_file):
     #write the header first
     vcf_df_cols = get_vcf_header(vcfName)
 
-    for variant in chosen_variants:
+    for variant in variant_map:
 
         #get coordinates
-        [chrom, pos] = variant.split("_")[:2]
+        chrom = eqtl_file.loc[eqtl_file['variant_id']==variant, ['variant_chr']].iloc[0,0]
+        pos = eqtl_file.loc[eqtl_file['variant_id']==variant, ['variant_pos']].iloc[0,0]
 
         #query vcf using tabix
         try:
@@ -151,8 +159,9 @@ def read_haplotypes(vcfName, eqtl_file):
             records = tabix_haplotypes.fetch(chrom, int(pos) - 1, int(pos))
 
             for record in records:
-
-                vcf_df.append(record.split('\t'))
+                record_info = record.split('\t')
+                if record_info[2] == variant:
+                    vcf_df.append(record_info)
 
 
         except:
@@ -162,10 +171,13 @@ def read_haplotypes(vcfName, eqtl_file):
 
     vcf_dataframe = pd.DataFrame(vcf_df, columns=vcf_df_cols).drop_duplicates()
 
+    # Use clean variant ids
+    vcf_dataframe['ID'] = vcf_dataframe.ID.map(variant_map)
+
     #do a quick check and raise an exception if no eqtls were found
     if vcf_dataframe.empty:
 
-        raise Exception("No mathing EQTLs were found in VCF file - check variant ID formatting")
+        raise Exception("No matching EQTLs were found in VCF file - check variant ID formatting")
 
     
     return vcf_dataframe
@@ -184,7 +196,7 @@ def drop_novcf_variants(eqtl_dataframe, vcf_dataframe):
     
     '''Drop variants that we couldnt get from the vcf file from the eqtl matrix'''
 
-    corrected_eqtl_dataframe = eqtl_dataframe[eqtl_dataframe.variant_id.isin(vcf_dataframe.ID)]
+    corrected_eqtl_dataframe = eqtl_dataframe[eqtl_dataframe.variant_id_clean.isin(vcf_dataframe.ID)]
     
     return corrected_eqtl_dataframe
     
