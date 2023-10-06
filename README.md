@@ -96,7 +96,7 @@ Where Name is a column that has the gene ID (such as ENSG00000224533), which sho
 
 
 
-### EQTLs
+### eQTLs
 
 This file should contain gene IDs, variant IDs that match - it can also contain other stuff, but it needs to contain at least these two columns:
 ```
