@@ -63,7 +63,7 @@ python3 afcn.py --normalize --logtransform -j 12 --conf --vcf input_vcf.gz --exp
 
 **--expr** *EXPR-FILE* Expressions file
 
-**--eqtl** *EQTL-FILE* File containing QTL to calculate allelic fold change
+**--eqtl** *eQTL-FILE* File containing QTL to calculate allelic fold change
 
 **--output** *OUT-FILE* Output file name
 
