@@ -207,7 +207,7 @@ def main():
 
     #Save results
     print("Writing results to file: " + str(args.output)) 
-    out_df.to_csv(args.output, index=None)
+    out_df.to_csv(args.output, index=None, sep='\t')
     
 
      
