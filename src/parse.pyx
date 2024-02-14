@@ -8,23 +8,6 @@ import warnings
 import sys
 warnings.filterwarnings("ignore")
 
-def is_variant_id_format_valid(eqtl_file):
-
-    '''Checks if the variant ids in the eqtl matrix begin with a valid character'''
-
-    #get the first character of all rows
-    variant_ids = eqtl_file['variant_id'].tolist()
-    firstchar_isdigit = [str(var_id)[0].isalpha() for var_id in variant_ids]
-
-    #check if any of these characters is a digit
-    if True in firstchar_isdigit:
-
-        return True
-
-    else:
-
-        return False
-
 
 def read_eqtls(eqtl_filename):
     
