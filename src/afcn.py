@@ -168,11 +168,11 @@ def main():
 
         thisgene_expressions = expression_matrix[expression_matrix.index.isin([gene])]
         #variants in this gene
-        thisgene_variants = eqtl_matrix[eqtl_matrix.gene_id_clean == gene].variant_id
+        thisgene_variants = eqtl_matrix[eqtl_matrix.gene_id_clean == gene].variant_id_clean
         #haplotypes for these variants for all inds
         thisgene_haplotypes = haplotype_matrix[haplotype_matrix.index.isin(list(thisgene_variants))]
         #the eqtl entries for this gene
-        thisgene_eqtls = eqtl_matrix[(eqtl_matrix.gene_id_clean == gene) & (eqtl_matrix.variant_id.isin(list(thisgene_variants)))]    
+        thisgene_eqtls = eqtl_matrix[(eqtl_matrix.gene_id_clean == gene) & (eqtl_matrix.variant_id_clean.isin(list(thisgene_variants)))]    
         #save in dictionary
         inputs[gene] = [thisgene_expressions, thisgene_eqtls, thisgene_haplotypes, cov_dataf_full, args]
 
@@ -192,7 +192,7 @@ def main():
     out_df = pd.merge(eqtl_dataframe_copy, final_df, how='left',on=original_columns )
 
     #now drop the gene_id_clean column
-    out_df = out_df.drop(columns=["gene_id_clean"])
+    out_df = out_df.drop(columns=["gene_id_clean", "variant_id_clean"])
     
     ###############################################################################
     #
@@ -207,7 +207,7 @@ def main():
 
     #Save results
     print("Writing results to file: " + str(args.output)) 
-    out_df.to_csv(args.output, index=None)
+    out_df.to_csv(args.output, index=None, sep='\t')
     
 
      
