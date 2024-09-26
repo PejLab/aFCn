@@ -23,7 +23,7 @@ from the GitHub repo using `pip`
 ```
 
 Alternatively, clone this repository then install from
-local source code using `pip`.
+local source code using `pip`, we hope to support PyPI soon.
 
 
 ## Examples
