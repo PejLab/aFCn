@@ -6,7 +6,8 @@
 The `afcn` program applies a mechanistic model of gene
 expression regulation by *cis*-regulatory elements developed
 by [Mohammadi et al. 2017 (1)](README.md#(1)) and 
-[Ehsan et al. 2024 (2)](README.md#(2)).  Here, we provide submodules
+[Ehsan et al. 2024 (2)](README.md#(2)).  Here, we provide two
+submodules
 
 * `afcn fit` to infer model parameters from data
 * `afcn predict` to generate gene expression predictions from
