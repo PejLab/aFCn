@@ -19,7 +19,7 @@ The package requires `Python >= 3.9` and can be installed directly
 from the GitHub repo using `pip`
 
 ```
-python -m pip install git+https://github.com/PejLab/aFCn/tree/v2_devgit
+python -m pip install git+https://github.com/PejLab/aFCn/tree/v2_dev
 ```
 
 Alternatively, clone this repository then install from
