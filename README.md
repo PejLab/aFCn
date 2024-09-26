@@ -1,7 +1,7 @@
 ![unit-tests](https://github.com/PejLab/aFCn/actions/workflows/unit-tests.yml/badge.svg?branch=new_interface)
 
 
-# `afcn` A tool to fit, predict, and perform TWAS using phased genotype data
+# `afcn` A tool to fit and predict gene expression by a mechanistic model
 
 The `afcn` program applies a mechanistic model of gene
 expression regulation by *cis*-regulatory elements developed
@@ -11,10 +11,6 @@ by [Mohammadi et al. 2017 (1)](README.md#(1)) and
 * `afcn fit` to infer model parameters from data
 * `afcn predict` to generate gene expression predictions from
     phased genotypes.
-* `afcn twas` to perform transcriptome wide association analysis,
-    [TWAS (3)](README.md#(3)) / [prediXcan (4)](README.md#(4)),
-      🚧 **under construction** 🚧
-
 
 
 ## Installation
@@ -23,7 +19,7 @@ The package requires `Python >= 3.9` and can be installed directly
 from the GitHub repo using `pip`
 
 ```
-python -m pip install git+https://github.com/PejLab/haptwas.git
+python -m pip install git+https://github.com/PejLab/aFCn/tree/v2_devgit
 ```
 
 Alternatively, clone this repository then install from
@@ -32,7 +28,7 @@ local source code using `pip`.
 
 ## Examples
 
-Examples and ficticious data can be found in the [example directory](example/)
+Examples and ficticious data can be found in the [example directory](afcn/example/)
 of this repository.  These examples demonstrate the enumerate options and
 how to use each submodule.  (`afcn fit` is under construction).
 
@@ -125,35 +121,5 @@ Estimate the gene count of sample $i$ attributed to
   pages={522},
   year={2024},
   publisher={Nature Publishing Group UK London}
-}
-```
-
-### (3)
-
-```
-@article{Gusev2016NatureGenetics,
-  title={Integrative approaches for large-scale transcriptome-wide association studies},
-  author={Gusev, Alexander and Ko, Arthur and Shi, Huwenbo and Bhatia, Gaurav and Chung, Wonil and Penninx, Brenda WJH and Jansen, Rick and De Geus, Eco JC and Boomsma, Dorret I and Wright, Fred A and others},
-  journal={Nature Genetics},
-  volume={48},
-  number={3},
-  pages={245--252},
-  year={2016},
-  publisher={Nature Publishing Group US New York}
-}
-```
-
-### (4)
-
-```
-@article{Gamazon2015NatureGenetics,
-  title={A gene-based association method for mapping traits using reference transcriptome data},
-  author={Gamazon, Eric R and Wheeler, Heather E and Shah, Kaanan P and Mozaffari, Sahar V and Aquino-Michaels, Keston and Carroll, Robert J and Eyler, Anne E and Denny, Joshua C and GTEx Consortium and Nicolae, Dan L and others},
-  journal={Nature Genetics},
-  volume={47},
-  number={9},
-  pages={1091--1098},
-  year={2015},
-  publisher={Nature Publishing Group US New York}
 }
 ```
