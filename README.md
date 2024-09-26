@@ -1,140 +1,159 @@
-# aFC-n
-aFC-n calculates the effect size of conditionally independent Expression Quantitative Trait Loci (eQTLs) based on allelic Fold Change (aFC), which could be used to predict genetically driven gene expressionan and allelic imbalance using conditional eQTL data. This script calculates aFCs using least squares optimization (levenberg-marquardt) for a set of eQTLs given a set of gene expressions and phased VCF file. See the [manuscript](https://www.nature.com/articles/s41467-024-44710-8) for method description.
+![unit-tests](https://github.com/PejLab/aFCn/actions/workflows/unit-tests.yml/badge.svg?branch=new_interface)
+
+
+# `afcn` A tool to fit, predict, and perform TWAS using phased genotype data
+
+The `afcn` program applies a mechanistic model of gene
+expression regulation by *cis*-regulatory elements developed
+by [Mohammadi et al. 2017 (1)](README.md#(1)) and 
+[Ehsan et al. 2024 (2)](README.md#(2)).  Here, we provide submodules
+
+* `afcn fit` to infer model parameters from data
+* `afcn predict` to generate gene expression predictions from
+    phased genotypes.
+* `afcn twas` to perform transcriptome wide association analysis,
+    [TWAS (3)](README.md#(3)) / [prediXcan (4)](README.md#(4)),
+      🚧 **under construction** 🚧
 
 
 
 ## Installation
 
-First install all the dependencies by doing:
-```
-pip3 -r requirements.txt
-```
-
-You will also need gcc and the python 3 development headers. If you are on a Debian based distro, do:
-```
-sudo apt install gcc python3-dev
-```
-Or on RHEL derivatives:
-```
-sudo dnf install gcc python3-devel
-```
-
-Finally, compile the cython files:
-```
-bash compile.sh
-```
-## Running the code effectively
-
-Running the least squares optimization on several cores is highly recommended, see the plot below as well as the usage examples for more details.
-![alt text](cores_plot.png)
-
-## Usage Examples
-
-Calculating aFCs without confidence intervals on a single core:
-```
-python3 afcn.py --vcf input_vcf.gz --expr input_expressions.gz --eqtl eqtls.txt --output output.txt
-```
-
-Calculating aFCs with confidence intervals on a single core:
-```
-python3 afcn.py --conf --vcf input_vcf.gz --expr input_expressions.gz --eqtl eqtls.txt --output output.txt
-```
-
-Calculating aFCs with confidence intervals using 12 cores:
-```
-python3 afcn.py -j 12 --conf --vcf input_vcf.gz --expr input_expressions.gz --eqtl eqtls.txt --output output.txt
-```
-
-Calculating aFCs with confidence intervals using 12 cores, with the expressions being in GCT format:
-```
-python3 afcn.py --gct -j 12 --conf --vcf input_vcf.gz --expr input_expressions.gz --eqtl eqtls.txt --output output.txt
-```
-
-Calculating aFCs with confidence intervals using 12 cores, with the expressions being log transformed and normalized (--logtransform will do log-transform, --normalize will do log-transform and normalization) :
-```
-python3 afcn.py --normalize --logtransform -j 12 --conf --vcf input_vcf.gz --expr input_expressions.gz --eqtl eqtls.txt --output output.txt
-```
-
-## Use flags
-
-### Required
-
-**--vcf** *VCF-FILE* Genotype VCF
-
-**--expr** *EXPR-FILE* Expressions file
-
-**--eqtl** *eQTL-FILE* File containing QTL to calculate allelic fold change
-
-**--output** *OUT-FILE* Output file name
-
-### Optional
-
-**--nthreads** *N* Number of threads to do fitting on
-
-**--conf** Calculate confidence intervals for aFC estimates
-
-**--normalize** Expressions matrix has not been normalized yet
-
-**--logtransform** Expressions matrix has not been log transformed yet
-
-**--splitexpr** If set, the individual names in the expressions file will be split on “-” characters and the parts of the name on the two side of the first “-” character will be retained.
-
-**--gct** If set, it will be assumed that the Expressions file is in gct format
-
-
-## Input formats
-
-IMPORTANT: The REF and ALT information in the VCF file should match the REF and ALT information in the EQTL matrix
-
-### Expressions file
-
-The script expects a gzipped file as an input for gene counts. The input gene counts should be in the format:
-```
-Name, sample_id1, sample_id2..
-```
-Where Name is a column that has the gene ID (such as ENSG00000224533), which should be in the same format as the gene IDs in the EQTL file.
-
-
-
-### eQTLs
-
-This file should contain gene IDs, variant IDs that match - it can also contain other stuff, but it needs to contain at least these two columns:
-```
-gene_id	variant_id other_stuff1 other_stuff2...
-```
-
-
-### VCF file
+The package requires `Python >= 3.9` and can be installed directly
+from the GitHub repo using `pip`
 
 ```
-#CHROM  POS     ID      REF     ALT     QUAL    FILTER  INFO  sample_id1  sample_id2...
-```
-where #CHROM is the chr # POS is the position, ID is the variant ID in the format chr1_13550_G_A_b38, REF is the reference allele, ALT is the alternative allele. A tabix index needs to be generated for the gzipped vcf file:
-
-```
-bgzip vcf_file.vcf && tabix -p vcf vcf_file.vcf.gz
+python -m pip install git+https://github.com/PejLab/haptwas.git
 ```
 
-## Output file
-
-Your output will be your input EQTL matrix, except that the resulting columns will be added as the additional columns at the end.
-
-### By default
-
-**log2_aFC** - the resulting aFC values 
-
-**log2_aFC_error** - Standard error of the aFCs
-
-**log2_aFC_c0** - The residual from the fit
-
-### With the --conf flag
-
-**log2_aFC_min_95_interv** - The lower 95% conf interval for the aFC value
-
-**log2_aFC_plus_95_interv** - The upper 95% conf interval for the aFC value
-
-**log2_aFC_c0_min_95_interv** - The lower 95% conf interval for the residual
-
-**log2_aFC_c0_plus_95_interv** - The upper 95% conf interval for the residual
+Alternatively, clone this repository then install from
+local source code using `pip`.
 
 
+## Examples
+
+Examples and ficticious data can be found in the [example directory](example/)
+of this repository.  These examples demonstrate the enumerate options and
+how to use each submodule.  (`afcn fit` is under construction).
+
+
+## Method description
+
+Mohammadi et al. 2017 (1) defined allele fold change (aFC) as the 
+ratio in the number of gene transcripts under the alternative 
+allele with respect to that of the reference allele.  Consequently,
+it is a parameter that quantifies the effect of any one regulatory
+variant with its target gene.  The authors of (1) showed mathematically
+how to combine individual phased genotypes and aFC values to predict 
+observed gene expression.  While this definition and model is general,
+the authors used it to specifically study *cis*-regulatory effects 
+of gene regulation.  
+
+This software package for the Python programming language can be 
+used as:
+
+`afcn fit` 🚧 **under construction** 🚧
+
+Infers model parameters ($\alpha$, $\beta$) values by least squares.  As an example
+    consider the *cis*-regulation of an arbitrary gene.  Let
+    $i = 1,2,\dots, N$ be an index identifying one of $N$ samples,
+    $j = 1,2, \dots, J$ be an index identifying one of $J$ *cis*-regulatory
+    loci, and $h=1,2$ be an index identifying one of 2 phased haplotypes.
+    For each $i$, we have RNA Sequencing derived gene counts $y_i$ and
+    $J$ length vectors of phased haplotypes $x_i^{(1)}$ and 
+    $x_i^{(2)}$.  An allele at locus $j$ for haplotype $h$ sample $i$,
+    $x_{ij}^{(h)}$, takes values 0 and 1 representing the presence of
+    either reference or alternative allele, respectively.  Let's denote the
+    model predicted expression of our arbitrary gene by haplotype
+    $h$, defined by Mohammadi et al. 2017 (1),
+  
+$$
+    g\big(x_i^{(h)}, \alpha, \beta\big) = 2^{\alpha + x_{i}^{(h) T}\beta}
+$$
+
+then the total expression of the gene in sample $i$ is
+
+$$
+f\big(x_i^{(1)}, x_i^{(2)},\alpha, \beta\big) = g\big(x_i^{(1)}, \alpha, \beta\big) \
+    + g\big(x_i^{(2)}, \alpha, \beta\big)
+$$
+    
+Where $\alpha$ is a scalar represents the log2 reference expression
+and $\beta$ is a $J$ length vector the log2 fold change per locus.  Inference
+of these parameters will be computed by least squares
+
+$$
+\hat{\alpha},\hat{\beta} = \underset{\alpha,\beta}{\text{argmin}} \
+    \sum_{i=1}^N \left( \
+    \log_2\big(y_i + 1\big) - \log_2\big( f(x_i^{(1)},x_i^{(2)}, \alpha,\beta)\big) \
+    \right)^2
+$$
+
+`afcn predict`
+
+Estimate the gene count of sample $i$ attributed to
+  haplotype $h$ is $g(x_{i}^{(h)},\alpha=0,\beta)$, and
+  the total gene count $f(x_{i}^{(1)},x_{i}^{(2)},\alpha=0,\beta)$.
+  
+
+## References
+
+### (1) 
+
+```
+@article{Mohammadi2017GenomeResearch,
+  title={Quantifying the regulatory effect size of cis-acting genetic variation using allelic fold change},
+  author={Mohammadi, Pejman and Castel, Stephane E and Brown, Andrew A and Lappalainen, Tuuli},
+  journal={Genome research},
+  volume={27},
+  number={11},
+  pages={1872--1884},
+  year={2017},
+  publisher={Cold Spring Harbor Lab}
+}
+```
+
+### (2)
+
+```
+@article{Ehsan2024NatureCommunications,
+  title={Haplotype-aware modeling of cis-regulatory effects highlights the gaps remaining in eQTL data},
+  author={Ehsan, Nava and Kotis, Bence M and Castel, Stephane E and Song, Eric J and Mancuso, Nicholas and Mohammadi, Pejman},
+  journal={Nature Communications},
+  volume={15},
+  number={1},
+  pages={522},
+  year={2024},
+  publisher={Nature Publishing Group UK London}
+}
+```
+
+### (3)
+
+```
+@article{Gusev2016NatureGenetics,
+  title={Integrative approaches for large-scale transcriptome-wide association studies},
+  author={Gusev, Alexander and Ko, Arthur and Shi, Huwenbo and Bhatia, Gaurav and Chung, Wonil and Penninx, Brenda WJH and Jansen, Rick and De Geus, Eco JC and Boomsma, Dorret I and Wright, Fred A and others},
+  journal={Nature Genetics},
+  volume={48},
+  number={3},
+  pages={245--252},
+  year={2016},
+  publisher={Nature Publishing Group US New York}
+}
+```
+
+### (4)
+
+```
+@article{Gamazon2015NatureGenetics,
+  title={A gene-based association method for mapping traits using reference transcriptome data},
+  author={Gamazon, Eric R and Wheeler, Heather E and Shah, Kaanan P and Mozaffari, Sahar V and Aquino-Michaels, Keston and Carroll, Robert J and Eyler, Anne E and Denny, Joshua C and GTEx Consortium and Nicolae, Dan L and others},
+  journal={Nature Genetics},
+  volume={47},
+  number={9},
+  pages={1091--1098},
+  year={2015},
+  publisher={Nature Publishing Group US New York}
+}
+```

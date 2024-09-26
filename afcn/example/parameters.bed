@@ -1,0 +1,27 @@
+##version=1.21.30arbitraryVersion
+##data_set=arbitrary_numbers_for_testing_code
+##date=2023-12-05
+#chrom	qtl_start	qtl_end	qtl_id	gene_start	gene_end	gene_id	variant_pos	variant_id	ref	alt	log2_afc	sem	p_val
+chrm10	5000	100000	"g1/v1/status=0"	7500	100000	"gene_1"	5000	"VAR_1"	A	T	2.2	0.1	 0.002
+chrm10	5005	100000	"g1/v2/status=0"	7500	100000	"gene_1"	5005	"VAR_2"	G	T	0.2	0.1	 0.2
+chrm10	5007	100000	"g1/v3/status=0"	7500	100000	"gene_1"	5007	"VAR_3"	G	C	0.01	0.1	 0.5
+chrm10	5010	100000	"g2/v4/status=1"	10200	100000	"gene_2"	5010	"VAR_4"	G	C	0.01	0.1	 0.5
+chrm10	6010	100000	"g3/v5/status=0"	10200	100000	"gene_3"	6010	"VAR_5"	G	A	0.01	0.1	 0.5
+chrm10	6011	100000	"g3/v6/status=0"	10200	100000	"gene_3"	6011	"VAR_6"	A	C	0.01	0.1	 0.5
+chrm10	6012	100000	"g3/v7/status=0"	10200	100000	"gene_3"	6012	"VAR_7"	C	A	0.01	0.1	 0.5
+chrm10	10250	1000000	"g4/v8/status=3"	10375	100000	"gene_4"	10250	"VAR_8"	A	T	0.1	0.01	0.0005
+chrm10	10251	1000000	"g4/v9/status=0"	10375	100000	"gene_4"	10251	"VAR_9"	A	G	0.1	0.01	0.0005
+chrm10	11100	1000000	"g5/v10/status=4"	10775	100000	"gene_5"	11100	"VAR_10"	A	G	0.1	0.01	0.0005
+chrm10	11101	1000000	"g5/v11/status=0"	10775	100000	"gene_5"	11101	"VAR_11"	T	G	0.1	0.01	0.0005
+chrm10	11102	1000000	"g5/v12/status=0"	10775	100000	"gene_5"	11102	"VAR_12"	C	G	0.1	0.01	0.0005
+chrm10	11200	1000000	"g6/v13/status=0"	10875	100000	"gene_6"	11200	"VAR_13"	G	A	0.1	0.01	0.0005
+chrm10	11201	1000000	"g6/v14/status=0"	10875	100000	"gene_6"	11201	"VAR_14"	T	A	0.1	0.01	0.0005
+chrm10	11202	1000000	"g6/v15/status=4"	10875	100000	"gene_6"	11202	"VAR_15"	G	A	0.1	0.01	0.0005
+chrm10	11203	1000000	"g6/v16/status=0"	10875	100000	"gene_6"	11203	"VAR_16"	A	T	0.1	0.01	0.0005
+chrm10	11301	1000000	"g7/v17/status=0"	10975	100000	"gene_7"	11301	"VAR_17"	T	A	0.1	0.01	0.0005
+chrm10	11302	1000000	"g7/v18/status=-2"	10975	100000	"gene_7"	11302	"VAR_18"	G	A	0.1	0.01	0.0005
+chrm10	11303	1000000	"g7/v19/status=0"	10975	100000	"gene_7"	11303	"VAR_19"	A	T	0.1	0.01	0.0005
+chrm10	11401	1000000	"g8/v20/status=0"	11575	100000	"gene_8"	11401	"VAR_20"	T	A	0.1	0.01	0.0005
+chrm10	11402	1000000	"g8/v21/status=-1"	11575	100000	"gene_8"	11402	"VAR_21"	G	A	0.1	0.01	0.0005
+chrm10	11403	1000000	"g8/v22/status=0"	11575	100000	"gene_8"	11403	"VAR_22"	A	T	0.1	0.01	0.0005
+chrm11	321	1000	"g9/v23/status=0"	500	1000	"gene_9"	321	"VAR_23"	A	T	0.2	0.02	0.00001

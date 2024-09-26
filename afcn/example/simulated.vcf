@@ -1,0 +1,34 @@
+##fileformat=VCFv4.4
+##fileDate=20230622
+##source=No Source, this is a 'dummy' VCF
+##reference=No reference
+##phasing=Mixed
+##contig=<ID=chrm10,length=12345678,assembly=no_assembly,species=not_a_species>
+##INFO=<ID=SD,Number=1,Type=Integer,Description="Ficticious Data">
+##INFO=<ID=RD,Number=1,Type=Integer,Description="Space holder">
+##FILTER=<ID=q10,Description="Qualtiy score below 10">
+##FILTER=<ID=s50,Description="Less than 50% of samples with genotype.">
+##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
+##FORMAT=<ID=GQ,Number=1,Type=Integer,Description="Genotype Quality">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	SAMPLE_1	SAMPLE_2	SAMPLE_3
+chrm10	5001	var_1	A	T	30	PASS	SD=10;RD=42	GT:GQ	0|0:34	0|1:20	1|0:21
+chrm10	5006	var_2	G	T	30	PASS	SD=10;RD=42	GT:GQ	0|0:34	0|1:20	1|0:21
+chrm10	5008	var_3	G	C	30	PASS	SD=10;RD=42	GT:GQ	0|0:34	0|1:20	1|0:21
+chrm10	6011	var_5	G	A	30	PASS	SD=12;RD=52	GT:GQ	0|0:34	0|1:20	1|0:21
+chrm10	6012	var_6	A	T,C	30	PASS	SD=12;RD=52	GT:GQ	0|0:34	0|2:20	1|2:21
+chrm10	6013	var_7	C	A	30	PASS	SD=12;RD=52	GT:GQ	0|0:34	0|1:20	1|1:21
+chrm10	10251	var_8	A	.	30	PASS	SD=12;RD=52	GT:GQ	0|0:34	0|1:20	1|0:21
+chrm10	10252	var_9	A	G	30	PASS	SD=12;RD=52	GT:GQ	0|0:34	0|1:20	1|0:21
+chrm10	11101	var_10	A	G	3	q10	SD=12;RD=52	GT:GQ	0|0:34	0|1:20	1|0:21
+chrm10	11102	var_11	T	G	30	PASS	SD=12;RD=52	GT:GQ	0|0:34	0|1:20	1|0:21
+chrm10	11103	var_12	C	G	30	PASS	SD=12;RD=52	GT:GQ	0|0:34	0|1:20	1|0:21
+chrm10	11201	var_13	G	A	30	PASS	SD=12;RD=52	GT:GQ	0|0:34	0|1:20	1|0:21
+chrm10	11202	var_14	T	A	30	PASS	SD=12;RD=52	GT:GQ	0|0:34	0|1:20	1|0:21
+chrm10	11203	var_15	G	A	30	q10;s50	SD=12;RD=52	GT:GQ	0|0:34	0|1:20	1|0:21
+chrm10	11204	var_16	A	T	30	PASS	SD=12;RD=52	GT:GQ	0|0:34	0|1:20	1|0:21
+chrm10	11302	var_17	T	A	30	PASS	SD=12;RD=52	GT:GQ	0|0:34	0|1:20	1|0:21
+chrm10	11303	var_18	G	A	30	PASS	SD=12;RD=52	GT:GQ	0|0:34	0/1:20	1|0:21
+chrm10	11304	var_19	A	T	30	PASS	SD=12;RD=52	GT:GQ	0|0:34	0|1:20	1|0:21
+chrm10	11402	var_20	T	A	30	PASS	SD=12;RD=52	GT:GQ	0|0:34	0|1:20	1|0:21
+chrm10	11403	var_21	G	T	30	PASS	SD=12;RD=52	GT:GQ	0|0:34	0|1:20	1|0:21
+chrm10	11404	var_22	A	T	30	PASS	SD=12;RD=52	GT:GQ	0|0:34	0|1:20	1|0:21

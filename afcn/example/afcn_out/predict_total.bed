@@ -1,0 +1,18 @@
+##afcn_version=2.1.1b0
+##date=2024-06-26
+##python_version=3.12.3
+##user=bobby
+##data=Predicted gene expression
+##vcf=simulated.vcf.bgz
+##parameter_file=parameters.bed
+##sample_values=gene expression haplotype_1 + haplotype_2
+#chrom	start	end	gene_id	SAMPLE_1	SAMPLE_2	SAMPLE_3
+chrm10	7500	100000	"gene_1"	2.0	12.133961145065307	12.133961145065307
+chrm10	10200	100000	"gene_2"	nan	nan	nan
+chrm10	10200	100000	"gene_3"	2.0	nan	nan
+chrm10	10375	100000	"gene_4"	nan	nan	nan
+chrm10	10775	100000	"gene_5"	nan	nan	nan
+chrm10	10875	100000	"gene_6"	nan	nan	nan
+chrm10	10975	100000	"gene_7"	nan	nan	nan
+chrm10	11575	100000	"gene_8"	nan	nan	nan
+chrm11	500	1000	"gene_9"	nan	nan	nan

@@ -1,0 +1,5 @@
+include afcn/example/parameters.bed
+include afcn/example/simulated.vcf.bgz
+include afcn/example/simulated.vcf.bgz.tbi
+recursive-include afcn/filespecs/*.md
+

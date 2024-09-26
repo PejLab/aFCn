@@ -1,0 +1,1 @@
+INFO	2024-06-26 12:59:55	/Users/bobby/scri/projs/haptwas/pkgs/haptwas/src/afcn/__main__.py fit --vcf simulated.vcf.bgz --expr tmp.bed --eqtl eqtl.bed

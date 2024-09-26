@@ -1,0 +1,12 @@
+INFO	2024-06-26 13:24:16	/Users/bobby/scri/projs/haptwas/pkgs/haptwas/src/afcn/__main__.py predict --vcf simulated.vcf.bgz --params parameters.bed
+INFO	2024-06-26 13:24:16	output_hap_file:afcn_out/predict_by_hap.bed
+INFO	2024-06-26 13:24:16	output_total_file:afcn_out/predict_total.bed
+INFO	2024-06-26 13:24:16	Begin predictions
+INFO	2024-06-26 13:24:16	contig:chrm10	bed_pos:5010	status:1	msg:VariantNotFound at locus chrm10:5010 not in VCF.
+INFO	2024-06-26 13:24:16	contig:chrm10	bed_pos:10250	status:2	msg:NoAltAllele VCF locus chrm10:10251
+INFO	2024-06-26 13:24:16	contig:chrm10	bed_pos:11100	status:3	msg:FilterMismatch VCF locus chrm10:11101 filter values (q10), valid filter values (PASS)
+INFO	2024-06-26 13:24:16	contig:chrm10	bed_pos:11202	status:3	msg:FilterMismatch VCF locus chrm10:11203 filter values (q10,s50), valid filter values (PASS)
+INFO	2024-06-26 13:24:16	contig:chrm10	bed_pos:11302	status:-2	msg:Not phased
+INFO	2024-06-26 13:24:16	contig:chrm10	bed_pos:11402	status:-1	msg:Alt allele in bed file not a member of alt alleles in VCF.
+INFO	2024-06-26 13:24:16	contig:chrm11	bed_pos:321	status:4	msg:ValueError('invalid contig `chrm11`')
+INFO	2024-06-26 13:24:16	End predictions

@@ -2,7 +2,14 @@
 *.c
 src/build
 *~
+*.vscode
 *.DS_Store
 *.swp
+*.coverage
+*egg-info/
+htmlcov/
+docs/
+build/
+example/*/
 *__pycache__/
 *.ipynb_checkpoints/
