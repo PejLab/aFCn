@@ -30,7 +30,8 @@ local source code using `pip`, we hope to support PyPI soon.
 
 Examples and ficticious data can be found in the [example directory](afcn/example/)
 of this repository.  These examples demonstrate the enumerate options and
-how to use each submodule.  (`afcn fit` is under construction).
+how to use each submodule.  (`afcn fit` is under construction, but will
+be available soon).
 
 
 ## Method description
