@@ -6,7 +6,8 @@
 The `afcn` program applies a mechanistic model of gene
 expression regulation by *cis*-regulatory elements developed
 by [Mohammadi et al. 2017 (1)](README.md#(1)) and 
-[Ehsan et al. 2024 (2)](README.md#(2)).  Here, we provide submodules
+[Ehsan et al. 2024 (2)](README.md#(2)).  Here, we provide two
+submodules
 
 * `afcn fit` to infer model parameters from data
 * `afcn predict` to generate gene expression predictions from
@@ -19,18 +20,18 @@ The package requires `Python >= 3.9` and can be installed directly
 from the GitHub repo using `pip`
 
 ```
-python -m pip install git+https://github.com/PejLab/aFCn/tree/v2_dev
 ```
 
 Alternatively, clone this repository then install from
-local source code using `pip`.
+local source code using `pip`, we hope to support PyPI soon.
 
 
 ## Examples
 
 Examples and ficticious data can be found in the [example directory](afcn/example/)
 of this repository.  These examples demonstrate the enumerate options and
-how to use each submodule.  (`afcn fit` is under construction).
+how to use each submodule.  (`afcn fit` is under construction, but will
+be available soon).
 
 
 ## Method description
