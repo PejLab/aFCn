@@ -7,6 +7,9 @@ src/build
 *.swp
 *.coverage
 *egg-info/
+analyses
+.venv/
+env/
 htmlcov/
 docs/
 build/
