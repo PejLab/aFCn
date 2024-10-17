@@ -12,6 +12,7 @@ Available Functions:
     simulate : generate simulated gene expression from genotype
         and model parameters
 """
+from collections.abc import Callable
 import numbers
 import numpy as np
 from scipy import optimize as opt
@@ -22,7 +23,8 @@ from . import utils
 
 # TODO how to handle missing genotype data, e.g. nans, should I ignore?
 # TODO how to handle missing effect sizes?
-def _predict(haplotype, alpha, beta):
+def _predict(haplotype: np.ndarray[int], alpha: float,
+             beta: float | np.ndarray[float]) -> float | np.ndarray[float]:
     """Compute model, without input checks.
 
     Args:
@@ -31,7 +33,8 @@ def _predict(haplotype, alpha, beta):
     return np.exp2(alpha + np.dot(haplotype, beta))
 
 
-def predict(haplotype, alpha, beta):
+def predict(haplotype: np.ndarray[int], alpha: float,
+            beta: float | np.ndarray[float]) -> float | np.ndarray:
     """Expected abundance of a gene's transcripts under model.
 
     Apply the haplotype aware model of gene expression published
@@ -66,7 +69,11 @@ def predict(haplotype, alpha, beta):
     return _predict(haplotype, alpha, beta)
 
 
-def simulate(hap_one, hap_two, alpha, beta, sd, seed=None):
+def simulate(hap_one: np.ndarray[int], hap_two: np.ndarray[int],
+             alpha: float,
+             beta: np.ndarray[float], sd: float,
+             seed:int | np.random.Generator
+             ) -> np.ndarray[float]:
     """Simulate gene expression data.
     
     Args:
@@ -86,7 +93,8 @@ def simulate(hap_one, hap_two, alpha, beta, sd, seed=None):
             numpy.random.defaul_rng(seed), (default None)
 
     Returns:
-
+        np.ndarray
+            The sum of haplotype specific gene expression, linear scale
     """
     rng = np.random.default_rng(seed=seed)
 
@@ -100,7 +108,9 @@ def simulate(hap_one, hap_two, alpha, beta, sd, seed=None):
                 * np.exp(rng.normal(0, sd, size=size)))
 
 
-def _linear_expansion_model(haplotype_one, haplotype_two, y):
+def _linear_expansion_model(haplotype_one: np.ndarray[int],
+                            haplotype_two: np.ndarray[int],
+                            y: np.ndarray[float]) -> dict:
     """Linear regression using the Pseudo-inverse
 
     The linearized model is the first order Taylor expansion
@@ -159,7 +169,9 @@ def _linear_expansion_model(haplotype_one, haplotype_two, y):
 
 
 
-def _obj(haplotype_one, haplotype_two, y, reg, reg_const):
+def _obj(haplotype_one: np.ndarray[int], haplotype_two: np.ndarray[int],
+         y: np.ndarray[float],
+         reg: str, reg_const: numbers.Number) -> Callable:
     """Function closure for least squares optimization.
 
     Return 
@@ -173,12 +185,9 @@ def _obj(haplotype_one, haplotype_two, y, reg, reg_const):
 
         _penalty_func = lambda k: 0
 
-    elif reg == 'l1' and isinstance(reg_const, numbers.Number):
-
-        _penalty_func = lambda k: reg_const * np.sum(np.abs(k))
-
     elif reg == "l2" and isinstance(reg_const, numbers.Number):
 
+        raise NotImplementedError
         _penalty_func = lambda k: reg_const * k @ k
 
     else:
@@ -186,7 +195,7 @@ def _obj(haplotype_one, haplotype_two, y, reg, reg_const):
                         " regularization method and constant pair")
     
 
-    def _g(k):
+    def _g(k: np.ndarray[float]) -> float:
         return (np.sum((y 
             - np.log2(1 + _predict(haplotype_one,
                                k[0],
@@ -199,7 +208,11 @@ def _obj(haplotype_one, haplotype_two, y, reg, reg_const):
     return _g
 
 
-def fit(haplotype_one, haplotype_two, y, reg=None, reg_const=None):
+def fit(haplotype_one: np.ndarray[int],
+        haplotype_two: np.ndarray[int],
+        y: np.ndarray[float],
+        reg: None | str = None,
+        reg_const: None | numbers.Number = None) -> dict:
     """Fit isoform abundances, + pseudo count, to isoform model.
 
     Fits data using Newton-CG minimizer
@@ -242,18 +255,18 @@ def fit(haplotype_one, haplotype_two, y, reg=None, reg_const=None):
                      reg, reg_const)
 
     jacobian = utils.Gradient(objective)
-    hessian = utils.Hessian(objective)
+    #hessian = utils.Hessian(objective)
 
     out = opt.minimize(objective, 
                        lout["pars"],
                        method="Newton-CG",
                        jac = jacobian,
-                       hess = hessian,
                        options={"disp":False})
 
 
     out.matrix_rank = lout["rank"]
 
-    hessian = utils.Hessian(objective)
-    out.hessian = hessian(out.x)
+    # TODO fix hessian implmentation
+    # hessian = utils.Hessian(objective)
+    # out.hessian = hessian(out.x)
     return out

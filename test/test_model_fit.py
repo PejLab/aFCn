@@ -72,7 +72,7 @@ class TestObj(unittest.TestCase):
 
     def test_variables_and_output_type(self):
 
-        reg = "l1"
+        reg = "l2"
         regconst = 2
 
         input_vals = (self.hap_one, self.hap_two, self.y,
@@ -129,44 +129,44 @@ class TestObj(unittest.TestCase):
         self.assertEqual(f(pars), ssr_no_penalty)
 
 
-    def test_l1_penalty(self):
-        # Here we test whether a penalty term returns the intended
-        # value.  This is done by picking output values that match
-        # model predictions, i.e. the sum squared residuals (ssr) is
-        # zero.  The value that is returned by the objective function
-        # is then penalty term.
-        reg = "l1"
-        regconst = 3.45
-
-        # recall the number of parameters is j_vars +1, where
-        # the 1 accounts for the log reference abundance
-        pars = np.ones(self.j_vars+1)
-
-        # when all the haplotypes are match the reference
-        # allele, then I expect the model prediction to produce
-        # 2* exp2(log_ref_const)  = 2 * exp2(1) = 4
-        y = np.zeros(self.n_samples) + np.log2(1 + 4)
-
-        haplotypes = np.zeros(shape=self.hap_one.shape)
-
-        # given these inputs I expect that the only term 
-        # of the objective that is non-zero
-        # is the penalty term.  As each parameter = 1, then the 
-        # penalty term under l1 is simply regconst * (j_vars + 1)
-        f = model._obj(haplotypes, haplotypes, y, reg, regconst)
-
-        self.assertEqual(f.__closure__[0].cell_contents.__closure__[0].cell_contents,
-                         regconst)
-
-        self.assertEqual(f(pars), regconst*(self.j_vars + 1))
-        
-
-        # 2* exp(log_ref_const)  = 2 * exp2(-1) = 1
-        pars = -np.ones(self.j_vars+1)
-        y = np.zeros(self.n_samples) + np.log2(1 + 1)
-
-        f = model._obj(haplotypes, haplotypes, y, reg, regconst)
-        self.assertEqual(f(pars), regconst*(self.j_vars + 1))
+#     def test_l1_penalty(self):
+#         # Here we test whether a penalty term returns the intended
+#         # value.  This is done by picking output values that match
+#         # model predictions, i.e. the sum squared residuals (ssr) is
+#         # zero.  The value that is returned by the objective function
+#         # is then penalty term.
+#         reg = "l1"
+#         regconst = 3.45
+# 
+#         # recall the number of parameters is j_vars +1, where
+#         # the 1 accounts for the log reference abundance
+#         pars = np.ones(self.j_vars+1)
+# 
+#         # when all the haplotypes are match the reference
+#         # allele, then I expect the model prediction to produce
+#         # 2* exp2(log_ref_const)  = 2 * exp2(1) = 4
+#         y = np.zeros(self.n_samples) + np.log2(1 + 4)
+# 
+#         haplotypes = np.zeros(shape=self.hap_one.shape)
+# 
+#         # given these inputs I expect that the only term 
+#         # of the objective that is non-zero
+#         # is the penalty term.  As each parameter = 1, then the 
+#         # penalty term under l1 is simply regconst * (j_vars + 1)
+#         f = model._obj(haplotypes, haplotypes, y, reg, regconst)
+# 
+#         self.assertEqual(f.__closure__[0].cell_contents.__closure__[0].cell_contents,
+#                          regconst)
+# 
+#         self.assertEqual(f(pars), regconst*(self.j_vars + 1))
+#         
+# 
+#         # 2* exp(log_ref_const)  = 2 * exp2(-1) = 1
+#         pars = -np.ones(self.j_vars+1)
+#         y = np.zeros(self.n_samples) + np.log2(1 + 1)
+# 
+#         f = model._obj(haplotypes, haplotypes, y, reg, regconst)
+#         self.assertEqual(f(pars), regconst*(self.j_vars + 1))
 
 
     def test_l2_penalty(self):
