@@ -9,9 +9,13 @@ By: Genomic Data Modeling Lab
 from importlib import metadata
 import re
 import numpy as np
+from scipy.stats import norm
 
 NUMPY_NUMERIC_DTYPE_KINDS = ("f", "u", "i")
 
+def genotype_cdf(x, eigen):
+    # Reshape eigen to broadcast across all samples
+    return norm.cdf(x, 0, np.sqrt(eigen).reshape(-1, 1))
 
 def is_numeric_nparray(x):
     """Test whether numpy array is numeric.
