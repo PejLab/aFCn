@@ -231,11 +231,8 @@ def fit(haplotype_one: np.ndarray[int],
        out 
     """
     # validate input for common mistakes
-    if model_type! = "PC":
-        if (not utils.is_biallelic(haplotype_one) 
-            or not utils.is_biallelic(haplotype_two)):
-
-            raise ValueError("Input haplotypes are not biallelic, e.g. (0,1,np.nan)")
+    if model_type != "PC" and (not utils.is_biallelic(haplotype_one) or not utils.is_biallelic(haplotype_two)):
+        raise ValueError("Input haplotypes are not biallelic, e.g. (0,1,np.nan)")
 
     if haplotype_one.shape != haplotype_two.shape:
         raise ValueError("haplotypes are not identical dimension")
@@ -248,10 +245,9 @@ def fit(haplotype_one: np.ndarray[int],
 
     # if model type is "PC" then convert PC loading values to "genotype" value between 0 and 1
     if model_type == "PC":
-        convert_hap_one_to_geno = utlis.genotype_cdf(haplotype_one, eigenvalues)
-        convert_hap_two_to_geno = utlis.genotype_cdf(haplotype_two, eigenvalues)
-        haplotype_one = convert_hap_one_to_geno
-        haplotype_two = conver_hap_two_to_geno
+        haplotype_one = utils.genotype_cdf(haplotype_one, eigenvalues)
+        haplotype_two = utils.genotype_cdf(haplotype_two, eigenvalues)
+        
         
     # find initial parameters values
     lout = _linear_expansion_model(haplotype_one,
