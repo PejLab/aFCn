@@ -212,7 +212,9 @@ def fit(haplotype_one: np.ndarray[int],
         haplotype_two: np.ndarray[int],
         y: np.ndarray[float],
         reg: None | str = None,
-        reg_const: None | numbers.Number = None) -> dict:
+        reg_const: None | numbers.Number = None,
+        model_type: str | None = None,
+        eigenvalues: np.ndarray[float] | None = None) -> dict:
     """Fit isoform abundances, + pseudo count, to isoform model.
 
     Fits data using Newton-CG minimizer
@@ -229,9 +231,7 @@ def fit(haplotype_one: np.ndarray[int],
        out 
     """
     # validate input for common mistakes
-    if (not utils.is_biallelic(haplotype_one) 
-        or not utils.is_biallelic(haplotype_two)):
-
+    if model_type != "PC" and (not utils.is_biallelic(haplotype_one) or not utils.is_biallelic(haplotype_two)):
         raise ValueError("Input haplotypes are not biallelic, e.g. (0,1,np.nan)")
 
     if haplotype_one.shape != haplotype_two.shape:
@@ -243,7 +243,12 @@ def fit(haplotype_one: np.ndarray[int],
     if (y < 0).any():
         raise ValueError("Gene counts can't be negative")
 
-
+    # if model type is "PC" then convert PC loading values to "genotype" value between 0 and 1
+    if model_type == "PC":
+        haplotype_one = utils.genotype_cdf(haplotype_one, eigenvalues)
+        haplotype_two = utils.genotype_cdf(haplotype_two, eigenvalues)
+        
+        
     # find initial parameters values
     lout = _linear_expansion_model(haplotype_one,
                                    haplotype_two,
