@@ -128,7 +128,7 @@ class TestPredict(TestCase):
         """
         tmp = self.h1.copy()
         tmp[24] = 4
-        with self.assertRaises(ValueError):
+        with self.assertRaises(model.BiallelicError):
             model.predict(tmp, self.alpha, self.beta)
 
     def test_beta_check(self):
@@ -161,17 +161,17 @@ class TestPredict(TestCase):
 
 
     def test_alpha_check(self):
-        with self.assertRaises(ValueError):
+        with self.assertRaises(model.ModelParameterError):
             model.predict(self.h1,
                           np.array([self.alpha]),
                           self.beta)
             
-        with self.assertRaises(ValueError):
+        with self.assertRaises(model.ModelParameterError):
             model.predict(self.h1,
                           "cat",
                           self.beta)
 
-        with self.assertRaises(ValueError):
+        with self.assertRaises(model.ModelParameterError):
             model.predict(self.h1,
                           [self.alpha],
                           self.beta)

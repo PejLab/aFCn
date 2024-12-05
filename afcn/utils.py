@@ -11,6 +11,11 @@ import re
 import numpy as np
 
 NUMPY_NUMERIC_DTYPE_KINDS = ("f", "u", "i")
+NUM_DIFF_TOL = 2e-8
+MAX_ITER = 100
+MAX_ITER_STEP_SIZE = 20
+MIN_DIFF_STEP=1e-12
+NUM_DIFF_STEP_FOLD_CHAGE=0.5
 
 
 def is_numeric_nparray(x):
@@ -56,7 +61,7 @@ class Gradient:
 
     _h0 = 1e-3
 
-    def __init__(self,f, tol=0.00000001):
+    def __init__(self,f, tol=NUM_DIFF_TOL):
         self._f = f
         self._tol = tol
 
@@ -70,7 +75,8 @@ class Gradient:
             delta = 100 * self._tol
             dfdx = 1.
 
-            while np.abs(delta > self._tol):
+            j = 0
+            while np.abs(delta) > self._tol and j < MAX_ITER:
                 previous_dfdx = dfdx
 
                 tmp[i] = x[i] + h
@@ -82,9 +88,10 @@ class Gradient:
                 dfdx /= (2*h)
 
                 delta = dfdx - previous_dfdx
-                h /= 10
+                h *= NUM_DIFF_STEP_FOLD_CHAGE
+                j += 1
 
-            tmp[i] = x[i]
+            # tmp[i] = x[i]
             grad_vector[i] = dfdx
 
         return grad_vector
@@ -120,8 +127,8 @@ class Hessian:
     """
     _h0 = 1e-3
 
-    def __init__(self, f, tol = 1e-6, 
-                 h_min=1e-12, h_fc=2):
+    def __init__(self, f, tol = NUM_DIFF_TOL, h_min=MIN_DIFF_STEP,
+                 h_fc=NUM_DIFF_STEP_FOLD_CHAGE):
         self._f = f
         self._tol = tol
         self._h_min = h_min
@@ -137,14 +144,19 @@ class Hessian:
     
         for i in range(p):
             
-            h = self._h0 * self._h_fc
+            h = self._h0
             delta = self._tol * 100
             hess_ii = 1.
+            iter_step_size = 0
     
-            while (np.abs(delta) > self._tol
-                   and h >= self._h_min):
+            j = 0
+            while (np.abs(delta) > self._tol and j < MAX_ITER):
 
-                h /= self._h_fc
+                iter_step_size += 1
+
+                if iter_step_size >= MAX_ITER_STEP_SIZE:
+                    iter_step_size = 1
+                    h *= self._h_fc
 
                 previous_hess_ii = hess_ii
                 tmp[i] = x[i] + 2*h
@@ -159,6 +171,7 @@ class Hessian:
                 hess_ii /= (4*(h**2))
         
                 delta = hess_ii - previous_hess_ii
+                j += 1
     
             out.matrix[i,i] = hess_ii
             out.h[idx] = h
@@ -183,14 +196,19 @@ class Hessian:
                     out.matrix[i,j] = out.matrix[j,i]
                     continue
     
-                h = self._h0 * self._h_fc
+                h = self._h0 
                 delta = self._tol * 100
                 hess_ij = 1.
     
-                while (np.abs(delta) > self._tol
-                       and h >= self._h_min):
+                iter_step_size = 0
+                while (np.abs(delta) > self._tol and h >= self._h_min):
 
-                    h /= self._h_fc
+                    iter_step_size += 1
+
+                    if iter_step_size >= MAX_ITER_STEP_SIZE:
+                        iter_step_size = 1
+                        h *= self._h_fc
+
 
                     previous_hess_ij = hess_ij
     

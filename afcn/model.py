@@ -20,6 +20,15 @@ from scipy import optimize as opt
 from . import utils
 
 
+# Recommendation by Anthropic's Claude
+class BiallelicError(Exception):
+    pass
+
+
+# Recommendation by Anthropic's Claude
+class ModelParameterError(Exception):
+    pass
+
 
 # TODO how to handle missing genotype data, e.g. nans, should I ignore?
 # TODO how to handle missing effect sizes?
@@ -55,13 +64,13 @@ def predict(haplotype: np.ndarray[int], alpha: float,
             originate from the input haplotype
     """
     if not utils.is_biallelic(haplotype):
-        raise ValueError("Genotypes are not biallelic")
+        raise BiallelicError("Genotypes are not biallelic")
 
     if beta.ndim != 1 or not utils.is_numeric_nparray(beta):
-        raise ValueError("beta must be 1-D np.ndarray.")
+        raise ModelParameterError("beta must be 1-D np.ndarray.")
 
     if not isinstance(alpha, numbers.Number):
-        raise ValueError("alpha must be a number, int or float")
+        raise ModelParameterError("alpha must be a number, int or float")
 
     if haplotype.ndim == 1:
         haplotype = haplotype.reshape(1, haplotype.size)
@@ -232,7 +241,7 @@ def fit(haplotype_one: np.ndarray[int],
     if (not utils.is_biallelic(haplotype_one) 
         or not utils.is_biallelic(haplotype_two)):
 
-        raise ValueError("Input haplotypes are not biallelic, e.g. (0,1,np.nan)")
+        raise BiallelicError("Input haplotypes are not biallelic, e.g. (0,1,np.nan)")
 
     if haplotype_one.shape != haplotype_two.shape:
         raise ValueError("haplotypes are not identical dimension")
@@ -255,12 +264,13 @@ def fit(haplotype_one: np.ndarray[int],
                      reg, reg_const)
 
     jacobian = utils.Gradient(objective)
-    #hessian = utils.Hessian(objective)
+    hessian = utils.Hessian(objective)
 
     out = opt.minimize(objective, 
                        lout["pars"],
                        method="Newton-CG",
                        jac = jacobian,
+                       hess = hessian,
                        options={"disp":False})
 
 
